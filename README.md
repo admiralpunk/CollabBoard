@@ -2,6 +2,8 @@
 
 CollabBoard is a collaborative whiteboard application that enables multiple users to draw, write, and interact on a shared canvas in real-time.
 
+![CollabBoard Screenshot](https://github.com/user-attachments/assets/4238d20d-c070-476b-b630-bcf27ee70f9f)
+
 ## Features
 
 - **Real-time Collaboration**: Multiple users can interact simultaneously on the same board.
