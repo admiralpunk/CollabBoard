@@ -31,15 +31,11 @@ Experience the live application: [CollabBoard Demo](https://collab-board1.vercel
    npm install
    ```
 
-### 3. **Set up environment variables**
+3. **Set up environment variables**
 
-Create a `.env` file in the frontend and backend directory of your project and define the necessary environment variables.
-
-You can use the provided `.env.example` file as a reference:
-
-```bash
-cp .env.example .env
-```
+   Create a `.env` file in the frontend and backend directory of your project and define the necessary environment variables.
+   
+   You can use the provided `.env.example` file as a reference.
 
 4. **Start the development server**:
 
