@@ -75,6 +75,11 @@ const VideoChat = ({ socket, roomId }) => {
             urls: import.meta.env.VITE_TURN_URL,
             username: import.meta.env.VITE_TURN_USERNAME,
             credential: import.meta.env.VITE_TURN_CREDENTIAL
+          },
+          {
+            urls: import.meta.env.VITE_TURN2_URL,
+            username: import.meta.env.VITE_TURN2_USERNAME,
+            credential: import.meta.env.VITE_TURN2_CREDENTIAL
           }
         ]
       });
