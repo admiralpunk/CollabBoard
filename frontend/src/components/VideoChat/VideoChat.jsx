@@ -168,7 +168,11 @@ const VideoChat = ({ socket, roomId }) => {
       if (data.type === "offer") {
         console.log(`[signal] Received offer from ${id}`, data.sdp);
         if (peer.signalingState === "have-local-offer") {
-          await peer.setRemoteDescription(new RTCSessionDescription(data.sdp));
+          try {
+            await peer.setRemoteDescription(new RTCSessionDescription(data.sdp));
+          } catch (err) {
+            console.warn(`[setRemoteDescription] Failed for ${id}:`, err);
+          }
         } else {
           console.warn(`[setRemoteDescription] Not in have-local-offer state, skipping. Current state: ${peer.signalingState}`);
         }
@@ -325,10 +329,14 @@ const VideoChat = ({ socket, roomId }) => {
         }
       } else if (data.type === "answer") {
         state.isSettingRemoteAnswerPending = true;
-        if (peer.signalingState === "have-local-offer") {
-          await peer.setRemoteDescription(new RTCSessionDescription(data.sdp));
-        } else {
-          console.warn(`[setRemoteDescription] Not in have-local-offer state, skipping. Current state: ${peer.signalingState}`);
+        try {
+          if (peer.signalingState === "have-local-offer") {
+            await peer.setRemoteDescription(new RTCSessionDescription(data.sdp));
+          } else {
+            console.warn(`[setRemoteDescription] Not in have-local-offer state, skipping. Current state: ${peer.signalingState}`);
+          }
+        } catch (err) {
+          console.warn(`[setRemoteDescription] Failed for ${id}:`, err);
         }
         state.isSettingRemoteAnswerPending = false;
         // Add any queued ICE candidates
