@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "simple-multi-peer": "^0.0.5",
+    "uuid": "^11.1.0"
+  }
+}

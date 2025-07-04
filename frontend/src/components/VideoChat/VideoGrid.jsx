@@ -26,9 +26,27 @@ const VideoGrid = ({ streams }) => {
   const videoRefs = useRef({});
 
   useEffect(() => {
+    console.log("VideoGrid: Updating streams", streams);
     Object.entries(streams).forEach(([peerId, stream]) => {
       if (videoRefs.current[peerId] && stream) {
-        videoRefs.current[peerId].srcObject = stream;
+        console.log("Setting stream for peer:", peerId);
+        const videoElement = videoRefs.current[peerId];
+        
+        // Only set srcObject if it's different
+        if (videoElement.srcObject !== stream) {
+          videoElement.srcObject = stream;
+          
+          // Play the video with better error handling
+          const playPromise = videoElement.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(e => {
+              // Only log errors that aren't about interrupted play requests
+              if (e.name !== 'AbortError') {
+                console.error("Error playing video for peer:", peerId, e);
+              }
+            });
+          }
+        }
       }
     });
   }, [streams]);
@@ -43,8 +61,30 @@ const VideoGrid = ({ streams }) => {
             playsInline
             muted={peerId === 'local'}
           />
+          <div style={{
+            position: 'absolute',
+            bottom: '8px',
+            left: '8px',
+            background: 'rgba(0,0,0,0.7)',
+            color: 'white',
+            padding: '2px 6px',
+            borderRadius: '4px',
+            fontSize: '12px'
+          }}>
+            {peerId === 'local' ? 'You' : `Peer ${peerId.slice(0, 6)}`}
+          </div>
         </VideoContainer>
       ))}
+      {Object.keys(streams).length === 0 && (
+        <div style={{ 
+          gridColumn: '1 / -1', 
+          textAlign: 'center', 
+          padding: '40px',
+          color: '#666'
+        }}>
+          No video streams available
+        </div>
+      )}
     </Grid>
   );
 };

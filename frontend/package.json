@@ -20,7 +20,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "simple-peer": "^9.11.1",
-    "socket.io-client": "^4.8.1",
+    "socket.io-client": "2.3.1",
     "styled-components": "^6.1.13",
     "wrtc": "^0.4.7"
   },
@@ -36,5 +36,8 @@
     "globals": "^15.14.0",
     "rollup-plugin-node-polyfills": "^0.2.1",
     "vite": "^6.0.5"
+  },
+  "resolutions": {
+    "socket.io-client": "2.3.1"
   }
 }
