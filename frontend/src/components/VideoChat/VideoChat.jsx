@@ -116,14 +116,18 @@ const VideoChat = ({ socket, roomId }) => {
         console.log(`[onnegotiationneeded] ${peerId}`);
         if (isInitiator) {
           try {
+            negotiationState[peerId] = negotiationState[peerId] || {};
+            negotiationState[peerId].makingOffer = true;
             const offer = await peer.createOffer();
             await peer.setLocalDescription(offer);
+            negotiationState[peerId].makingOffer = false;
             console.log(`[offer] Sent offer to ${peerId}`, offer);
             socket.emit("signal", {
               to: peerId,
               data: { type: "offer", sdp: peer.localDescription }
             });
           } catch (err) {
+            negotiationState[peerId].makingOffer = false;
             console.error("Error during negotiationneeded/offer:", err);
           }
         }
