@@ -70,17 +70,17 @@ const VideoChat = ({ socket, roomId }) => {
       const peer = new RTCPeerConnection({
         iceServers: [
           { urls: import.meta.env.VITE_STUN_URL_1 },
-          { urls: import.meta.env.VITE_STUN_URL_2 }
-          // {
-          //   urls: import.meta.env.VITE_TURN_URL,
-          //   username: import.meta.env.VITE_TURN_USERNAME,
-          //   credential: import.meta.env.VITE_TURN_CREDENTIAL
-          // },
-          // {
-          //   urls: import.meta.env.VITE_TURN2_URL,
-          //   username: import.meta.env.VITE_TURN2_USERNAME,
-          //   credential: import.meta.env.VITE_TURN2_CREDENTIAL
-          // }
+          { urls: import.meta.env.VITE_STUN_URL_2 },
+          {
+            urls: import.meta.env.VITE_TURN_URL,
+            username: import.meta.env.VITE_TURN_USERNAME,
+            credential: import.meta.env.VITE_TURN_CREDENTIAL
+          },
+          {
+            urls: import.meta.env.VITE_TURN2_URL,
+            username: import.meta.env.VITE_TURN2_USERNAME,
+            credential: import.meta.env.VITE_TURN2_CREDENTIAL
+          }
         ]
       });
       // Add local stream
@@ -179,13 +179,17 @@ const VideoChat = ({ socket, roomId }) => {
           }
           iceCandidateQueue[id] = [];
         }
-        const answer = await peer.createAnswer();
-        await peer.setLocalDescription(answer);
-        console.log(`[answer] Sent answer to ${id}`, answer);
-        socket.emit("signal", {
-          to: id,
-          data: { type: "answer", sdp: peer.localDescription }
-        });
+        if (peer.signalingState === "have-remote-offer") {
+          const answer = await peer.createAnswer();
+          await peer.setLocalDescription(answer);
+          console.log(`[answer] Sent answer to ${id}`, answer);
+          socket.emit("signal", {
+            to: id,
+            data: { type: "answer", sdp: peer.localDescription }
+          });
+        } else {
+          console.warn(`[answer] Not in have-remote-offer state, skipping answer for ${id}. Current state: ${peer.signalingState}`);
+        }
       } else if (data.type === "answer") {
         console.log(`[signal] Received answer from ${id}`, data.sdp);
         await peer.setRemoteDescription(new RTCSessionDescription(data.sdp));
@@ -282,13 +286,17 @@ const VideoChat = ({ socket, roomId }) => {
           }
           iceCandidateQueue[id] = [];
         }
-        const answer = await peer.createAnswer();
-        await peer.setLocalDescription(answer);
-        console.log(`[answer] Sent answer to ${id}`, answer);
-        socket.emit("signal", {
-          to: id,
-          data: { type: "answer", sdp: peer.localDescription }
-        });
+        if (peer.signalingState === "have-remote-offer") {
+          const answer = await peer.createAnswer();
+          await peer.setLocalDescription(answer);
+          console.log(`[answer] Sent answer to ${id}`, answer);
+          socket.emit("signal", {
+            to: id,
+            data: { type: "answer", sdp: peer.localDescription }
+          });
+        } else {
+          console.warn(`[answer] Not in have-remote-offer state, skipping answer for ${id}. Current state: ${peer.signalingState}`);
+        }
       } else if (data.type === "answer") {
         state.isSettingRemoteAnswerPending = true;
         await peer.setRemoteDescription(new RTCSessionDescription(data.sdp));
