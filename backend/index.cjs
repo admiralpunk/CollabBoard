@@ -7,10 +7,13 @@ const dotenv = require("dotenv");
 // Load environment variables
 dotenv.config();
 
+const PORT = process.env.PORT || 3000;
+const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
+
 const app = express();
 
 // Use CORS middleware for express
-app.use(cors());
+app.use(cors({ origin: CORS_ORIGIN }));
 
 const httpServer = createServer(app);
 // const io = socketio(httpServer, {
@@ -109,7 +112,6 @@ io.on("connection", (socket) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
-httpServer.listen(PORT, "0.0.0.0", () => {
+httpServer.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });

@@ -69,12 +69,12 @@ const VideoChat = ({ socket, roomId }) => {
     const createPeerConnection = (peerId, isInitiator) => {
       const peer = new RTCPeerConnection({
         iceServers: [
-          { urls: "stun:stun.l.google.com:19302" },
-          { urls: "stun:stun1.l.google.com:19302" },
+          { urls: import.meta.env.VITE_STUN_URL_1 },
+          { urls: import.meta.env.VITE_STUN_URL_2 },
           {
-            urls: "turn:openrelay.metered.ca:80",
-            username: "openrelayproject",
-            credential: "openrelayproject"
+            urls: import.meta.env.VITE_TURN_URL,
+            username: import.meta.env.VITE_TURN_USERNAME,
+            credential: import.meta.env.VITE_TURN_CREDENTIAL
           }
         ]
       });
