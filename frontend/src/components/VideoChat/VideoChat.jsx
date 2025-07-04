@@ -69,8 +69,8 @@ const VideoChat = ({ socket, roomId }) => {
     const createPeerConnection = (peerId, isInitiator) => {
       const peer = new RTCPeerConnection({
         iceServers: [
-          { urls: import.meta.env.VITE_STUN_URL_1 },
-          { urls: import.meta.env.VITE_STUN_URL_2 },
+          // { urls: import.meta.env.VITE_STUN_URL_1 },
+          // { urls: import.meta.env.VITE_STUN_URL_2 },
           {
             urls: import.meta.env.VITE_TURN_URL,
             username: import.meta.env.VITE_TURN_USERNAME,
