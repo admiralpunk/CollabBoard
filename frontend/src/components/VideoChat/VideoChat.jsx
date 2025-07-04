@@ -69,18 +69,18 @@ const VideoChat = ({ socket, roomId }) => {
     const createPeerConnection = (peerId, isInitiator) => {
       const peer = new RTCPeerConnection({
         iceServers: [
-          // { urls: import.meta.env.VITE_STUN_URL_1 },
-          // { urls: import.meta.env.VITE_STUN_URL_2 },
-          {
-            urls: import.meta.env.VITE_TURN_URL,
-            username: import.meta.env.VITE_TURN_USERNAME,
-            credential: import.meta.env.VITE_TURN_CREDENTIAL
-          },
-          {
-            urls: import.meta.env.VITE_TURN2_URL,
-            username: import.meta.env.VITE_TURN2_USERNAME,
-            credential: import.meta.env.VITE_TURN2_CREDENTIAL
-          }
+          { urls: import.meta.env.VITE_STUN_URL_1 },
+          { urls: import.meta.env.VITE_STUN_URL_2 }
+          // {
+          //   urls: import.meta.env.VITE_TURN_URL,
+          //   username: import.meta.env.VITE_TURN_USERNAME,
+          //   credential: import.meta.env.VITE_TURN_CREDENTIAL
+          // },
+          // {
+          //   urls: import.meta.env.VITE_TURN2_URL,
+          //   username: import.meta.env.VITE_TURN2_USERNAME,
+          //   credential: import.meta.env.VITE_TURN2_CREDENTIAL
+          // }
         ]
       });
       // Add local stream
