@@ -180,13 +180,17 @@ const VideoChat = ({ socket, roomId }) => {
           iceCandidateQueue[id] = [];
         }
         if (peer.signalingState === "have-remote-offer") {
-          const answer = await peer.createAnswer();
-          await peer.setLocalDescription(answer);
-          console.log(`[answer] Sent answer to ${id}`, answer);
-          socket.emit("signal", {
-            to: id,
-            data: { type: "answer", sdp: peer.localDescription }
-          });
+          try {
+            const answer = await peer.createAnswer();
+            await peer.setLocalDescription(answer);
+            console.log(`[answer] Sent answer to ${id}`, answer);
+            socket.emit("signal", {
+              to: id,
+              data: { type: "answer", sdp: peer.localDescription }
+            });
+          } catch (err) {
+            console.warn(`[answer] Failed to set local answer for ${id}:`, err);
+          }
         } else {
           console.warn(`[answer] Not in have-remote-offer state, skipping answer for ${id}. Current state: ${peer.signalingState}`);
         }
@@ -287,13 +291,17 @@ const VideoChat = ({ socket, roomId }) => {
           iceCandidateQueue[id] = [];
         }
         if (peer.signalingState === "have-remote-offer") {
-          const answer = await peer.createAnswer();
-          await peer.setLocalDescription(answer);
-          console.log(`[answer] Sent answer to ${id}`, answer);
-          socket.emit("signal", {
-            to: id,
-            data: { type: "answer", sdp: peer.localDescription }
-          });
+          try {
+            const answer = await peer.createAnswer();
+            await peer.setLocalDescription(answer);
+            console.log(`[answer] Sent answer to ${id}`, answer);
+            socket.emit("signal", {
+              to: id,
+              data: { type: "answer", sdp: peer.localDescription }
+            });
+          } catch (err) {
+            console.warn(`[answer] Failed to set local answer for ${id}:`, err);
+          }
         } else {
           console.warn(`[answer] Not in have-remote-offer state, skipping answer for ${id}. Current state: ${peer.signalingState}`);
         }
