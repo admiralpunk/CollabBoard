@@ -3,9 +3,15 @@ import styled from 'styled-components';
 
 const RoomContainer = styled.div`
   max-width: 400px;
-  margin: 50px auto;
+  margin: 0 auto;
   padding: 20px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  height: 100vh;
+  padding-top: 15vh;
 `;
 
 const Input = styled.input`
