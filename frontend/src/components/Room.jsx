@@ -31,23 +31,36 @@ const Button = styled.button`
   }
 `;
 
-const Room = ({ onJoinRoom }) => {
+const Room = ({ onJoinRoom, notification }) => {
   const [roomId, setRoomId] = useState('');
+  const [username, setUsername] = useState('');
+  const [error, setError] = useState('');
 
   const handleJoin = (e) => {
     e.preventDefault();
-    if (roomId.trim()) {
-      onJoinRoom(roomId);
+    if (!roomId.trim() || !username.trim()) {
+      setError('Please enter both Room ID and Username.');
+      return;
     }
+    setError('');
+    onJoinRoom(roomId, username);
   };
 
   const handleCreate = () => {
+    if (!username.trim()) {
+      setError('Please enter a Username.');
+      return;
+    }
+    setError('');
     const newRoomId = Math.random().toString(36).substring(7);
-    onJoinRoom(newRoomId);
+    onJoinRoom(newRoomId, username);
   };
 
   return (
     <RoomContainer>
+      {notification && (
+        <div style={{ background: '#ffeeba', color: '#856404', padding: 10, borderRadius: 4, marginBottom: 10 }}>{notification}</div>
+      )}
       <h2>Join or Create a Room</h2>
       <form onSubmit={handleJoin}>
         <Input
@@ -56,9 +69,16 @@ const Room = ({ onJoinRoom }) => {
           value={roomId}
           onChange={(e) => setRoomId(e.target.value)}
         />
+        <Input
+          type="text"
+          placeholder="Enter Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
         <Button type="submit">Join Room</Button>
       </form>
       <Button onClick={handleCreate}>Create New Room</Button>
+      {error && <div style={{ color: 'red', marginTop: 10 }}>{error}</div>}
     </RoomContainer>
   );
 };

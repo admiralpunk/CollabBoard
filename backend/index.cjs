@@ -28,24 +28,36 @@ const io = socketio(httpServer, {
 io.origins('*:*');
 
 const rooms = new Map();
+const userNames = new Map(); // socket.id -> username
 
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
-  socket.on("join-room", ({ roomId, userId }) => {
+  socket.on("join-room", ({ roomId, userId, username }) => {
     socket.join(roomId);
+    let roomCreated = false;
     if (!rooms.has(roomId)) {
       rooms.set(roomId, new Set());
+      roomCreated = true;
     }
     const userSet = rooms.get(roomId);
     const isNewUser = !userSet.has(userId);
     userSet.add(userId);
     socket._userId = userId;
     socket._roomId = roomId;
+    userNames.set(socket.id, username);
     const users = Array.from(userSet);
-    console.log("users", users);
-    socket.emit("all-users", { users });
-    console.log('[backend] Emitting all-users to', socket.id, 'with users:', users);
+    // Build a mapping of socketId to username for all sockets in the room
+    const socketsInRoom = Array.from(io.sockets.adapter.rooms[roomId]?.sockets ? Object.keys(io.sockets.adapter.rooms[roomId].sockets) : []);
+    const usernameMap = {};
+    socketsInRoom.forEach(sid => {
+      usernameMap[sid] = userNames.get(sid) || sid;
+    });
+    socket.emit("all-users", { users, usernameMap });
+    if (roomCreated) {
+      socket.emit("room-created", { roomId });
+    }
+    io.to(roomId).emit("usernames-update", { usernameMap });
     if (isNewUser) {
       io.to(roomId).emit("user-joined", {
         userId,
@@ -109,6 +121,7 @@ io.on("connection", (socket) => {
         }
       }
     });
+    userNames.delete(socket.id);
   });
 });
 

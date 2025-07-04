@@ -22,7 +22,7 @@ const Video = styled.video`
   object-fit: cover;
 `;
 
-const VideoGrid = ({ streams }) => {
+const VideoGrid = ({ streams, username, usernameMap }) => {
   const videoRefs = useRef({});
 
   useEffect(() => {
@@ -71,7 +71,7 @@ const VideoGrid = ({ streams }) => {
             borderRadius: '4px',
             fontSize: '12px'
           }}>
-            {peerId === 'local' ? 'You' : `Peer ${peerId.slice(0, 6)}`}
+            {peerId === 'local' ? 'You' : (usernameMap && usernameMap[peerId] ? usernameMap[peerId] : `Peer ${peerId.slice(0, 6)}`)}
           </div>
         </VideoContainer>
       ))}

@@ -14,7 +14,7 @@ const StyledCanvas = styled.canvas`
   background-color: white;
 `;
 
-const Canvas = ({ socket, roomId }) => {
+const Canvas = ({ socket, roomId, userId, username }) => {
   const canvasRef = useRef(null);
   const {
     isDrawing,
@@ -28,7 +28,7 @@ const Canvas = ({ socket, roomId }) => {
     setSize,
     setTool,
     clearCanvas,
-  } = useCanvas(canvasRef, socket, roomId);
+  } = useCanvas(canvasRef, socket, roomId, userId, username);
 
   return (
     <CanvasContainer>

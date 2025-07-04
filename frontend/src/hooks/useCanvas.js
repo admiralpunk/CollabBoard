@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 
-export const useCanvas = (canvasRef, socket, roomId) => {
+export const useCanvas = (canvasRef, socket, roomId, userId, username) => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [color, setColor] = useState("#000000");
   const [size, setSize] = useState(5);

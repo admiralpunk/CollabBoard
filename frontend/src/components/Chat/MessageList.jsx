@@ -22,10 +22,10 @@ const Message = styled.div`
   }
 `;
 
-const MessageList = ({ messages }) => (
+const MessageList = ({ messages, username }) => (
   <MessageListContainer>
     {messages.map((message) => (
-      <Message key={message.id} $isSelf={message.sender === "You"}>
+      <Message key={message.id} $isSelf={message.sender === username}>
         <strong>{message.sender}:</strong> {message.text}
       </Message>
     ))}

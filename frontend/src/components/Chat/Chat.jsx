@@ -13,15 +13,19 @@ const ChatContainer = styled.div`
   margin-top: 20px;
 `;
 
-const Chat = ({ socket, roomId }) => {
+const Chat = ({ socket, roomId, username }) => {
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
     const handleChatMessage = ({ message }) => {
-      // Check if this message is from another user by comparing socket IDs
-      if (message.socketId !== socket.id) {
-        setMessages((prev) => [...prev, { ...message, sender: "Other" }]);
-      }
+      // If the message is from this user, mark as self, else use sender from message
+      setMessages((prev) => [
+        ...prev,
+        {
+          ...message,
+          sender: message.socketId === socket.id ? username : message.sender || "Other"
+        }
+      ]);
     };
 
     socket.on("chat-message", handleChatMessage);
@@ -29,24 +33,22 @@ const Chat = ({ socket, roomId }) => {
     return () => {
       socket.off("chat-message", handleChatMessage);
     };
-  }, [socket]);
+  }, [socket, username]);
 
   const handleSendMessage = (message) => {
     const newMessage = {
-      id: Date.now(),
+      id: `${Date.now()}-${socket.id}`,
       text: message,
-      sender: "You",
+      sender: username,
       socketId: socket.id,
       timestamp: new Date().toISOString(),
     };
-
     socket.emit("chat-message", { roomId, message: newMessage });
-    setMessages((prev) => [...prev, newMessage]);
   };
 
   return (
     <ChatContainer>
-      <MessageList messages={messages} />
+      <MessageList messages={messages} username={username} />
       <MessageInput onSendMessage={handleSendMessage} />
     </ChatContainer>
   );

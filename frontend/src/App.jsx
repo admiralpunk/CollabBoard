@@ -39,7 +39,10 @@ function App() {
   const [roomId, setRoomId] = useState(null);
   const [userCount, setUserCount] = useState(0);
   const [userId] = useState(uuidv4());
+  const [username, setUsername] = useState("");
   const [connectionStatus, setConnectionStatus] = useState("connecting");
+  const [notification, setNotification] = useState("");
+  const [usernameMap, setUsernameMap] = useState({});
 
   useEffect(() => {
     // Connect to backend socket
@@ -86,8 +89,18 @@ function App() {
       setUserCount(userCount);
     });
 
-    newSocket.on("all-users", ({ users }) => {
+    newSocket.on("room-created", ({ roomId }) => {
+      setNotification(`Room with name ${roomId} does not exist. Creating one.`);
+      setTimeout(() => setNotification(""), 3000);
+    });
+
+    newSocket.on("usernames-update", ({ usernameMap }) => {
+      setUsernameMap(usernameMap);
+    });
+
+    newSocket.on("all-users", ({ users, usernameMap }) => {
       setUserCount(users.length);
+      if (usernameMap) setUsernameMap(usernameMap);
     });
 
     // Cleanup socket connection when the component unmounts
@@ -96,16 +109,15 @@ function App() {
     };
   }, []);
 
-  const handleJoinRoom = (id) => {
+  const handleJoinRoom = (id, name) => {
     setRoomId(id);
+    setUsername(name);
     if (socket && socket.connected) {
-      // For your app's user counting
-      socket.emit("join-room", { roomId: id, userId });
-      // For simple-multi-peer signaling
+      socket.emit("join-room", { roomId: id, userId, username: name });
       socket.emit("join", id);
     } else if (socket) {
       socket.once("connect", () => {
-        socket.emit("join-room", { roomId: id, userId });
+        socket.emit("join-room", { roomId: id, userId, username: name });
         socket.emit("join", id);
       });
     }
@@ -125,8 +137,11 @@ function App() {
 
   return (
     <AppContainer>
+      {notification && (
+        <div style={{ background: '#ffeeba', color: '#856404', padding: 10, borderRadius: 4, marginBottom: 10, textAlign: 'center' }}>{notification}</div>
+      )}
       {!roomId ? (
-        <Room onJoinRoom={handleJoinRoom} />
+        <Room onJoinRoom={handleJoinRoom} notification={notification} />
       ) : (
         <>
           <RoomInfo>
@@ -135,11 +150,11 @@ function App() {
           </RoomInfo>
           <ContentContainer>
             <LeftPanel>
-              <Canvas socket={socket} roomId={roomId} userId={userId} />
+              <Canvas socket={socket} roomId={roomId} userId={userId} username={username} />
             </LeftPanel>
             <RightPanel>
-              <VideoChat socket={socket} roomId={roomId} userId={userId} />
-              <Chat socket={socket} roomId={roomId} />
+              <VideoChat socket={socket} roomId={roomId} userId={userId} username={username} usernameMap={usernameMap} />
+              <Chat socket={socket} roomId={roomId} username={username} />
             </RightPanel>
           </ContentContainer>
         </>

@@ -13,7 +13,7 @@ const ErrorMessage = styled.div`
   font-size: 14px;
 `;
 
-const VideoChat = ({ socket, roomId }) => {
+const VideoChat = ({ socket, roomId, userId, username, usernameMap = {} }) => {
   const [peers, setPeers] = useState({});
   const [streams, setStreams] = useState({});
   const [peerCount, setPeerCount] = useState(0);
@@ -417,7 +417,7 @@ const VideoChat = ({ socket, roomId }) => {
       <div style={{ marginBottom: "10px", fontSize: "12px", color: "#666" }}>
         Connected peers: {peerCount} | Streams: {Object.keys(streams).length}
       </div>
-      <VideoGrid streams={streams} />
+      <VideoGrid streams={streams} username={username} usernameMap={usernameMap} />
       <Controls
         isAudioEnabled={isAudioEnabled}
         isVideoEnabled={isVideoEnabled}
