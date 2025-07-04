@@ -289,10 +289,12 @@ const VideoChat = ({ socket, roomId }) => {
           return;
         }
         state.isSettingRemoteAnswerPending = true;
-        if (peer.signalingState === "have-local-offer") {
+        try {
           await peer.setRemoteDescription(new RTCSessionDescription(data.sdp));
-        } else {
-          console.warn(`[setRemoteDescription] Not in have-local-offer state, skipping. Current state: ${peer.signalingState}`);
+        } catch (err) {
+          console.warn(`[setRemoteDescription] Failed to set remote offer for ${id}:`, err, `Current state: ${peer.signalingState}`);
+          state.isSettingRemoteAnswerPending = false;
+          return;
         }
         state.isSettingRemoteAnswerPending = false;
         // Add any queued ICE candidates
