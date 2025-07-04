@@ -92,12 +92,24 @@ io.on("connection", (socket) => {
     Object.keys(socket.rooms).forEach(room => {
       if (room !== socket.id) {
         socket.to(room).emit("peer-left", socket.id);
+        // Remove user from room's user set and emit updated user count
+        if (rooms.has(room)) {
+          const userSet = rooms.get(room);
+          if (socket._userId) {
+            userSet.delete(socket._userId);
+            io.to(room).emit("user-left", { userId: socket._userId, userCount: userSet.size });
+            // If room is empty, delete it
+            if (userSet.size === 0) {
+              rooms.delete(room);
+            }
+          }
+        }
       }
     });
   });
 });
 
 const PORT = process.env.PORT || 3000;
-httpServer.listen(PORT, () => {
+httpServer.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });

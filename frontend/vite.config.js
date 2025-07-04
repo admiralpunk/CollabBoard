@@ -47,5 +47,8 @@ export default defineConfig({
   },
   server: {
     open: true, // Open the browser on server start
+    allowedHosts: [
+      "828b-2401-4900-1c42-34d7-6b1b-f383-ef26-54e0.ngrok-free.app"
+    ]
   },
 });

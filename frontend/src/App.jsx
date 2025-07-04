@@ -82,6 +82,7 @@ function App() {
     });
 
     newSocket.on("user-left", ({ userCount }) => {
+      console.log("user-left event received", userCount);
       setUserCount(userCount);
     });
 
