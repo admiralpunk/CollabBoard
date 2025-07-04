@@ -45,6 +45,15 @@ const VideoChat = ({ socket, roomId }) => {
     // --- ICE candidate queue ---
     const iceCandidateQueue = {};
 
+    // --- Per-peer signaling queue (simple promise chain) ---
+    const signalingQueues = {};
+    function enqueueSignal(peerId, fn) {
+      if (!signalingQueues[peerId]) signalingQueues[peerId] = Promise.resolve();
+      signalingQueues[peerId] = signalingQueues[peerId].then(fn).catch((e) => {
+        console.warn(`[signalingQueue] Error for ${peerId}:`, e);
+      });
+    }
+
     // --- Helper functions ---
     const removePeer = (peerId) => {
       if (peersRef.current[peerId]) {
@@ -107,6 +116,21 @@ const VideoChat = ({ socket, roomId }) => {
       // Connection state
       peer.oniceconnectionstatechange = () => {
         console.log(`[oniceconnectionstatechange] ${peerId}: ${peer.iceConnectionState}`);
+        if (["disconnected", "failed"].includes(peer.iceConnectionState)) {
+          // Reconnection logic: try to reconnect after a short delay
+          setTimeout(() => {
+            if (["disconnected", "failed"].includes(peer.iceConnectionState)) {
+              console.warn(`[reconnect] Attempting to reconnect to ${peerId}`);
+              removePeer(peerId);
+              // Re-initiate connection
+              const isInitiator = myId < peerId;
+              const newPeer = createPeerConnection(peerId, isInitiator);
+              peersRef.current[peerId] = newPeer;
+              setPeers(prev => ({ ...prev, [peerId]: newPeer }));
+              setPeerCount(Object.keys(peersRef.current).length);
+            }
+          }, 2000); // 2 seconds delay
+        }
         if (["disconnected", "failed", "closed"].includes(peer.iceConnectionState)) {
           removePeer(peerId);
         }
@@ -120,9 +144,9 @@ const VideoChat = ({ socket, roomId }) => {
       peer.onnegotiationneeded = async () => {
         console.log(`[onnegotiationneeded] ${peerId}`);
         if (isInitiator) {
+          negotiationState[peerId] = negotiationState[peerId] || {};
+          negotiationState[peerId].makingOffer = true;
           try {
-            negotiationState[peerId] = negotiationState[peerId] || {};
-            negotiationState[peerId].makingOffer = true;
             const offer = await peer.createOffer();
             await peer.setLocalDescription(offer);
             negotiationState[peerId].makingOffer = false;
@@ -271,100 +295,103 @@ const VideoChat = ({ socket, roomId }) => {
     // --- Perfect Negotiation State ---
     const negotiationState = {};
 
-    // --- Enhanced handleSignal for perfect negotiation ---
+    // --- Enhanced handleSignal for perfect negotiation with queue ---
     async function handleSignalPerfectNegotiation({ id, data }) {
-      if (id === myId) return;
-      let peer = peersRef.current[id];
-      if (!peer) {
-        const isInitiator = myId < id;
-        peer = createPeerConnection(id, isInitiator);
-        peersRef.current[id] = peer;
-        setPeers(prev => ({ ...prev, [id]: peer }));
-      }
-      // Polite if myId > id
-      const polite = myId > id;
-      negotiationState[id] = negotiationState[id] || { makingOffer: false, ignoreOffer: false, isSettingRemoteAnswerPending: false }; 
-      const state = negotiationState[id];
-      if (data.type === "offer") {
-        const offerCollision = state.makingOffer || peer.signalingState !== "stable";
-        state.ignoreOffer = !polite && offerCollision;
-        if (state.ignoreOffer) {
-          console.log(`[perfect-negotiation] Ignoring offer from ${id} due to collision`);
-          return;
+      enqueueSignal(id, async () => {
+        if (id === myId) return;
+        let peer = peersRef.current[id];
+        if (!peer) {
+          const isInitiator = myId < id;
+          peer = createPeerConnection(id, isInitiator);
+          peersRef.current[id] = peer;
+          setPeers(prev => ({ ...prev, [id]: peer }));
         }
-        state.isSettingRemoteAnswerPending = true;
-        try {
-          await peer.setRemoteDescription(new RTCSessionDescription(data.sdp));
-        } catch (err) {
-          console.warn(`[setRemoteDescription] Failed to set remote offer for ${id}:`, err, `Current state: ${peer.signalingState}`);
-          state.isSettingRemoteAnswerPending = false;
-          return;
-        }
-        state.isSettingRemoteAnswerPending = false;
-        // Add any queued ICE candidates
-        if (iceCandidateQueue[id] && iceCandidateQueue[id].length > 0) {
-          for (const candidate of iceCandidateQueue[id]) {
-            try {
-              await peer.addIceCandidate(new RTCIceCandidate(candidate));
-            } catch (err) {
-              console.error("Error adding queued ICE candidate:", err);
-            }
+        // Polite if myId > id
+        const polite = myId > id;
+        negotiationState[id] = negotiationState[id] || { makingOffer: false, ignoreOffer: false, isSettingRemoteAnswerPending: false }; 
+        const state = negotiationState[id];
+        if (data.type === "offer") {
+          const offerCollision = state.makingOffer || peer.signalingState !== "stable";
+          state.ignoreOffer = !polite && offerCollision;
+          if (state.ignoreOffer) {
+            console.log(`[perfect-negotiation] Ignoring offer from ${id} due to collision`);
+            return;
           }
-          iceCandidateQueue[id] = [];
-        }
-        if (peer.signalingState === "have-remote-offer") {
+          state.isSettingRemoteAnswerPending = true;
           try {
-            const answer = await peer.createAnswer();
-            await peer.setLocalDescription(answer);
-            console.log(`[answer] Sent answer to ${id}`, answer);
-            socket.emit("signal", {
-              to: id,
-              data: { type: "answer", sdp: peer.localDescription }
-            });
-          } catch (err) {
-            console.warn(`[answer] Failed to set local answer for ${id}:`, err);
-          }
-        } else {
-          console.warn(`[answer] Not in have-remote-offer state, skipping answer for ${id}. Current state: ${peer.signalingState}`);
-        }
-      } else if (data.type === "answer") {
-        state.isSettingRemoteAnswerPending = true;
-        try {
-          if (peer.signalingState === "have-local-offer") {
             await peer.setRemoteDescription(new RTCSessionDescription(data.sdp));
-          } else {
-            console.warn(`[setRemoteDescription] Not in have-local-offer state, skipping. Current state: ${peer.signalingState}`);
+          } catch (err) {
+            console.warn(`[setRemoteDescription] Failed to set remote offer for ${id}:`, err, `Current state: ${peer.signalingState}`);
+            state.isSettingRemoteAnswerPending = false;
+            return;
           }
-        } catch (err) {
-          console.warn(`[setRemoteDescription] Failed for ${id}:`, err);
-        }
-        state.isSettingRemoteAnswerPending = false;
-        // Add any queued ICE candidates
-        if (iceCandidateQueue[id] && iceCandidateQueue[id].length > 0) {
-          for (const candidate of iceCandidateQueue[id]) {
+          state.isSettingRemoteAnswerPending = false;
+          // Add any queued ICE candidates
+          if (iceCandidateQueue[id] && iceCandidateQueue[id].length > 0) {
+            for (const candidate of iceCandidateQueue[id]) {
+              try {
+                await peer.addIceCandidate(new RTCIceCandidate(candidate));
+              } catch (err) {
+                console.error("Error adding queued ICE candidate:", err);
+              }
+            }
+            iceCandidateQueue[id] = [];
+          }
+          // Only create and set answer if in have-remote-offer state
+          if (peer.signalingState === "have-remote-offer") {
             try {
-              await peer.addIceCandidate(new RTCIceCandidate(candidate));
+              const answer = await peer.createAnswer();
+              await peer.setLocalDescription(answer);
+              console.log(`[answer] Sent answer to ${id}`, answer);
+              socket.emit("signal", {
+                to: id,
+                data: { type: "answer", sdp: peer.localDescription }
+              });
             } catch (err) {
-              console.error("Error adding queued ICE candidate:", err);
+              console.warn(`[answer] Failed to set local answer for ${id}:`, err);
+            }
+          } else {
+            console.warn(`[answer] Not in have-remote-offer state, skipping answer for ${id}. Current state: ${peer.signalingState}`);
+          }
+        } else if (data.type === "answer") {
+          state.isSettingRemoteAnswerPending = true;
+          try {
+            if (peer.signalingState === "have-local-offer") {
+              await peer.setRemoteDescription(new RTCSessionDescription(data.sdp));
+            } else {
+              console.warn(`[setRemoteDescription] Not in have-local-offer state, skipping. Current state: ${peer.signalingState}`);
+            }
+          } catch (err) {
+            console.warn(`[setRemoteDescription] Failed for ${id}:`, err);
+          }
+          state.isSettingRemoteAnswerPending = false;
+          // Add any queued ICE candidates
+          if (iceCandidateQueue[id] && iceCandidateQueue[id].length > 0) {
+            for (const candidate of iceCandidateQueue[id]) {
+              try {
+                await peer.addIceCandidate(new RTCIceCandidate(candidate));
+              } catch (err) {
+                console.error("Error adding queued ICE candidate:", err);
+              }
+            }
+            iceCandidateQueue[id] = [];
+          }
+        } else if (data.type === "ice-candidate") {
+          if (state.isSettingRemoteAnswerPending || !peer.remoteDescription || peer.remoteDescription.type === "") {
+            console.log(`[ice-candidate] Queuing candidate for ${id}`);
+            iceCandidateQueue[id] = iceCandidateQueue[id] || [];
+            iceCandidateQueue[id].push(data.candidate);
+          } else {
+            try {
+              await peer.addIceCandidate(new RTCIceCandidate(data.candidate));
+            } catch (err) {
+              console.error("Error adding ICE candidate:", err);
             }
           }
-          iceCandidateQueue[id] = [];
         }
-      } else if (data.type === "ice-candidate") {
-        if (state.isSettingRemoteAnswerPending || !peer.remoteDescription || peer.remoteDescription.type === "") {
-          console.log(`[ice-candidate] Queuing candidate for ${id}`);
-          iceCandidateQueue[id] = iceCandidateQueue[id] || [];
-          iceCandidateQueue[id].push(data.candidate);
-        } else {
-          try {
-            await peer.addIceCandidate(new RTCIceCandidate(data.candidate));
-          } catch (err) {
-            console.error("Error adding ICE candidate:", err);
-          }
-        }
-      }
-      // Log signaling state after every signal
-      console.log(`[signalingState] ${id}:`, peer.signalingState);
+        // Log signaling state after every signal
+        console.log(`[signalingState] ${id}:`, peer.signalingState);
+      });
     }
 
     // --- Replace old signal handler with perfect negotiation ---
