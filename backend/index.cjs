@@ -7,8 +7,8 @@ const dotenv = require("dotenv");
 // Load environment variables
 dotenv.config();
 
-const PORT = process.env.PORT || 3000;
-const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
+const PORT = process.env.PORT;
+const CORS_ORIGIN = process.env.CORS_ORIGIN || process.env.CORS_ORIGIN_DEV;
 
 const app = express();
 

@@ -43,7 +43,7 @@ function App() {
 
   useEffect(() => {
     // Connect to backend socket
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_BACKEND_URL_DEV;
     const transports = import.meta.env.VITE_SOCKET_TRANSPORTS?.split(",") || [
       "websocket",
       "polling",
