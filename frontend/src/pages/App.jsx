@@ -53,7 +53,7 @@ function App() {
       "polling",
     ];
 
-    console.log("Connecting to backend at:", backendUrl);
+    console.log("Connecting to backend");
     const newSocket = io(backendUrl, { 
       transports,
       timeout: 20000,
