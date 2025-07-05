@@ -49,16 +49,18 @@ function App() {
     // Connect to backend socket
     const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_BACKEND_URL_DEV;
     const transports = import.meta.env.VITE_SOCKET_TRANSPORTS?.split(",") || [
-      "websocket",
       "polling",
     ];
 
-    console.log("Connecting to backend");
+    console.log("Connecting to backend:", backendUrl);
+    console.log("Using transports:", transports);
     const newSocket = io(backendUrl, { 
-      transports,
+      transports: ["polling"],
+      upgrade: false,
+      rememberUpgrade: false,
       timeout: 20000,
       forceNew: true
-    }); // Backend URL and transports from environment variables
+    }); // Force polling only, disable WebSocket upgrade
     setSocket(newSocket);
 
     window.socket = newSocket;
