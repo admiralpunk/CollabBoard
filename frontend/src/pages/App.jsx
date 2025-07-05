@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import io from "socket.io-client";
 import styled from "styled-components";
-import Canvas from "./components/Canvas/Canvas";
-import VideoChat from "./components/VideoChat/VideoChat";
-import Chat from "./components/Chat/Chat";
-import Room from "./components/Room";
+import Canvas from "../features/canvas/Canvas";
+import VideoChat from "../features/video-chat/VideoChat";
+import Chat from "../features/chat/Chat";
+import Room from "../features/room/Room";
 import { v4 as uuidv4 } from 'uuid';
 
 const AppContainer = styled.div`
