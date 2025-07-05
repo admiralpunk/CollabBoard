@@ -4,10 +4,12 @@ export const usePeerConnection = (socket, roomId, stream, myId) => {
   const [peers, setPeers] = useState({});
   const [streams, setStreams] = useState({});
   const [peerCount, setPeerCount] = useState(0);
+  const [connectionStatus, setConnectionStatus] = useState({});
   const peersRef = useRef({});
   const iceCandidateQueue = useRef({});
   const signalingQueues = useRef({});
   const negotiationState = useRef({});
+  const connectionAttempts = useRef({});
 
   // Helper function to enqueue signals
   const enqueueSignal = (peerId, fn) => {
@@ -23,6 +25,7 @@ export const usePeerConnection = (socket, roomId, stream, myId) => {
 
   // Helper function to remove a peer
   const removePeer = (peerId) => {
+    console.log(`[removePeer] Removing peer ${peerId}`);
     if (peersRef.current[peerId]) {
       peersRef.current[peerId].close();
       delete peersRef.current[peerId];
@@ -36,17 +39,25 @@ export const usePeerConnection = (socket, roomId, stream, myId) => {
         delete newStreams[peerId];
         return newStreams;
       });
+      setConnectionStatus(prev => {
+        const newStatus = { ...prev };
+        delete newStatus[peerId];
+        return newStatus;
+      });
       setPeerCount(Object.keys(peersRef.current).length);
       delete iceCandidateQueue.current[peerId];
+      delete connectionAttempts.current[peerId];
     }
   };
 
   // Create peer connection
   const createPeerConnection = (peerId, isInitiator) => {
+    console.log(`[createPeerConnection] Creating connection to ${peerId}, isInitiator: ${isInitiator}`);
+    
     const peer = new RTCPeerConnection({
       iceServers: [
-        { urls: import.meta.env.VITE_STUN_URL_1 },
-        { urls: import.meta.env.VITE_STUN_URL_2 },
+        { urls: import.meta.env.VITE_STUN_URL_1 || "stun:stun.l.google.com:19302" },
+        { urls: import.meta.env.VITE_STUN_URL_2 || "stun:stun1.l.google.com:19302" },
         {
           urls: import.meta.env.VITE_TURN_URL,
           username: import.meta.env.VITE_TURN_USERNAME,
@@ -57,18 +68,24 @@ export const usePeerConnection = (socket, roomId, stream, myId) => {
           username: import.meta.env.VITE_TURN2_USERNAME,
           credential: import.meta.env.VITE_TURN2_CREDENTIAL
         }
-      ]
+      ].filter(server => server.urls) // Filter out undefined servers
     });
 
     // Add local stream
-    stream.getTracks().forEach(track => {
-      peer.addTrack(track, stream);
-    });
+    if (stream) {
+      stream.getTracks().forEach(track => {
+        console.log(`[addTrack] Adding track to peer ${peerId}:`, track.kind);
+        peer.addTrack(track, stream);
+      });
+    }
 
     // Handle incoming streams
     peer.ontrack = (event) => {
       console.log(`[ontrack] Received remote stream from: ${peerId}`, event.streams[0]);
-      setStreams(prev => ({ ...prev, [peerId]: event.streams[0] }));
+      if (event.streams && event.streams[0]) {
+        setStreams(prev => ({ ...prev, [peerId]: event.streams[0] }));
+        setConnectionStatus(prev => ({ ...prev, [peerId]: 'connected' }));
+      }
     };
 
     // ICE candidates
@@ -87,18 +104,27 @@ export const usePeerConnection = (socket, roomId, stream, myId) => {
     // Connection state changes
     peer.oniceconnectionstatechange = () => {
       console.log(`[oniceconnectionstatechange] ${peerId}: ${peer.iceConnectionState}`);
+      setConnectionStatus(prev => ({ ...prev, [peerId]: peer.iceConnectionState }));
+      
       if (["disconnected", "failed"].includes(peer.iceConnectionState)) {
-        setTimeout(() => {
-          if (["disconnected", "failed"].includes(peer.iceConnectionState)) {
-            console.warn(`[reconnect] Attempting to reconnect to ${peerId}`);
-            removePeer(peerId);
-            const isInitiator = myId < peerId;
-            const newPeer = createPeerConnection(peerId, isInitiator);
-            peersRef.current[peerId] = newPeer;
-            setPeers(prev => ({ ...prev, [peerId]: newPeer }));
-            setPeerCount(Object.keys(peersRef.current).length);
-          }
-        }, 2000);
+        const attempts = connectionAttempts.current[peerId] || 0;
+        if (attempts < 3) {
+          setTimeout(() => {
+            if (["disconnected", "failed"].includes(peer.iceConnectionState)) {
+              console.warn(`[reconnect] Attempting to reconnect to ${peerId} (attempt ${attempts + 1})`);
+              connectionAttempts.current[peerId] = attempts + 1;
+              removePeer(peerId);
+              const isInitiator = myId < peerId;
+              const newPeer = createPeerConnection(peerId, isInitiator);
+              peersRef.current[peerId] = newPeer;
+              setPeers(prev => ({ ...prev, [peerId]: newPeer }));
+              setPeerCount(Object.keys(peersRef.current).length);
+            }
+          }, 2000);
+        } else {
+          console.error(`[reconnect] Failed to reconnect to ${peerId} after ${attempts} attempts`);
+          removePeer(peerId);
+        }
       }
       if (["disconnected", "failed", "closed"].includes(peer.iceConnectionState)) {
         removePeer(peerId);
@@ -107,6 +133,7 @@ export const usePeerConnection = (socket, roomId, stream, myId) => {
 
     peer.onconnectionstatechange = () => {
       console.log(`[onconnectionstatechange] ${peerId}: ${peer.connectionState}`);
+      setConnectionStatus(prev => ({ ...prev, [peerId]: peer.connectionState }));
     };
 
     peer.onsignalingstatechange = () => {
@@ -135,13 +162,24 @@ export const usePeerConnection = (socket, roomId, stream, myId) => {
     };
 
     iceCandidateQueue.current[peerId] = [];
+    connectionAttempts.current[peerId] = 0;
     return peer;
   };
 
   // Handle peer joined
   const handlePeerJoined = (peerId) => {
-    if (peerId === myId) return;
-    if (peersRef.current[peerId]) return;
+    console.log(`[peer-joined] New peer joined: ${peerId}`);
+    console.log(`[peer-joined] My ID: ${myId}`);
+    console.log(`[peer-joined] Current peer connections:`, Object.keys(peersRef.current));
+    
+    if (peerId === myId) {
+      console.log(`[peer-joined] Skipping myself (${peerId})`);
+      return;
+    }
+    if (peersRef.current[peerId]) {
+      console.log(`[peer-joined] Already connected to ${peerId}`);
+      return;
+    }
     
     const isInitiator = myId < peerId;
     console.log(`[peer-joined] ${peerId}, I am ${myId}, isInitiator: ${isInitiator}`);
@@ -260,6 +298,9 @@ export const usePeerConnection = (socket, roomId, stream, myId) => {
   // Handle existing peers in room
   const handlePeersInRoom = (peersInRoom) => {
     console.log('[peers-in-room] Existing peers:', peersInRoom);
+    console.log('[peers-in-room] My ID:', myId);
+    console.log('[peers-in-room] Current peer connections:', Object.keys(peersRef.current));
+    
     peersInRoom.forEach((peerId) => {
       if (peerId !== myId && !peersRef.current[peerId]) {
         const isInitiator = myId < peerId;
@@ -268,6 +309,10 @@ export const usePeerConnection = (socket, roomId, stream, myId) => {
         peersRef.current[peerId] = peer;
         setPeers(prev => ({ ...prev, [peerId]: peer }));
         setPeerCount(Object.keys(peersRef.current).length);
+      } else if (peerId === myId) {
+        console.log(`[peers-in-room] Skipping myself (${peerId})`);
+      } else if (peersRef.current[peerId]) {
+        console.log(`[peers-in-room] Already connected to ${peerId}`);
       }
     });
   };
@@ -276,15 +321,34 @@ export const usePeerConnection = (socket, roomId, stream, myId) => {
   useEffect(() => {
     if (!stream || !roomId || !socket || !myId) return;
     
+    console.log(`[usePeerConnection] Setting up with roomId: ${roomId}, myId: ${myId}`);
     setStreams({ local: stream });
 
     socket.on("peer-joined", handlePeerJoined);
     socket.on("signal", handleSignalPerfectNegotiation);
     socket.on("peer-left", handlePeerLeft);
     socket.on("peers-in-room", handlePeersInRoom);
-    socket.emit("join", roomId);
+    
+    // Only emit join if socket is connected and we're in a room
+    if (socket.connected) {
+      console.log(`[usePeerConnection] Socket connected, emitting join for room: ${roomId}`);
+      // Small delay to ensure room join is processed first
+      setTimeout(() => {
+        socket.emit("join", roomId);
+      }, 100);
+    } else {
+      console.log(`[usePeerConnection] Socket not connected, waiting for connection`);
+      socket.once("connect", () => {
+        console.log(`[usePeerConnection] Socket connected, now emitting join for room: ${roomId}`);
+        // Small delay to ensure room join is processed first
+        setTimeout(() => {
+          socket.emit("join", roomId);
+        }, 100);
+      });
+    }
 
     return () => {
+      console.log(`[usePeerConnection] Cleaning up connections`);
       socket.off("peer-joined", handlePeerJoined);
       socket.off("signal", handleSignalPerfectNegotiation);
       socket.off("peer-left", handlePeerLeft);
@@ -294,10 +358,21 @@ export const usePeerConnection = (socket, roomId, stream, myId) => {
     };
   }, [roomId, stream, socket, myId]);
 
+  // Debug effect
+  useEffect(() => {
+    console.log(`[usePeerConnection] Current state:`, {
+      peerCount,
+      streams: Object.keys(streams),
+      peers: Object.keys(peersRef.current),
+      connectionStatus
+    });
+  }, [peerCount, streams, connectionStatus]);
+
   return {
     peers,
     streams,
     peerCount,
+    connectionStatus,
     removePeer
   };
 }; 

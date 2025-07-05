@@ -27,7 +27,11 @@ const VideoGrid = ({ streams, username, usernameMap }) => {
 
   useEffect(() => {
     console.log("VideoGrid: Updating streams", streams);
+    console.log("VideoGrid: Stream keys", Object.keys(streams));
+    console.log("VideoGrid: Stream count", Object.keys(streams).length);
+    
     Object.entries(streams).forEach(([peerId, stream]) => {
+      console.log(`VideoGrid: Processing stream for ${peerId}:`, stream);
       if (videoRefs.current[peerId] && stream) {
         console.log("Setting stream for peer:", peerId);
         const videoElement = videoRefs.current[peerId];
@@ -47,34 +51,43 @@ const VideoGrid = ({ streams, username, usernameMap }) => {
             });
           }
         }
+      } else if (!videoRefs.current[peerId]) {
+        console.log(`VideoGrid: No video ref for ${peerId}`);
+      } else if (!stream) {
+        console.log(`VideoGrid: No stream for ${peerId}`);
       }
     });
   }, [streams]);
 
+  console.log("VideoGrid: Rendering", Object.keys(streams).length, "video containers");
+  
   return (
     <Grid>
-      {Object.entries(streams).map(([peerId, stream]) => (
-        <VideoContainer key={peerId}>
-          <Video
-            ref={el => videoRefs.current[peerId] = el}
-            autoPlay
-            playsInline
-            muted={peerId === 'local'}
-          />
-          <div style={{
-            position: 'absolute',
-            bottom: '8px',
-            left: '8px',
-            background: 'rgba(0,0,0,0.7)',
-            color: 'white',
-            padding: '2px 6px',
-            borderRadius: '4px',
-            fontSize: '12px'
-          }}>
-            {peerId === 'local' ? 'You' : (usernameMap && usernameMap[peerId] ? usernameMap[peerId] : `Peer ${peerId.slice(0, 6)}`)}
-          </div>
-        </VideoContainer>
-      ))}
+      {Object.entries(streams).map(([peerId, stream]) => {
+        console.log(`VideoGrid: Rendering video for ${peerId}`);
+        return (
+          <VideoContainer key={peerId}>
+            <Video
+              ref={el => videoRefs.current[peerId] = el}
+              autoPlay
+              playsInline
+              muted={peerId === 'local'}
+            />
+            <div style={{
+              position: 'absolute',
+              bottom: '8px',
+              left: '8px',
+              background: 'rgba(0,0,0,0.7)',
+              color: 'white',
+              padding: '2px 6px',
+              borderRadius: '4px',
+              fontSize: '12px'
+            }}>
+              {peerId === 'local' ? 'You' : (usernameMap && usernameMap[peerId] ? usernameMap[peerId] : `Peer ${peerId.slice(0, 6)}`)}
+            </div>
+          </VideoContainer>
+        );
+      })}
       {Object.keys(streams).length === 0 && (
         <div style={{ 
           gridColumn: '1 / -1', 
