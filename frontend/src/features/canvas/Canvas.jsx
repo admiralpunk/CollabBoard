@@ -10,6 +10,7 @@ const CanvasContainer = styled.div`
 const StyledCanvas = styled.canvas`
   border: 2px solid #000;
   cursor: crosshair;
+  background-color: white;
 `;
 
 const ToolBar = styled.div`
@@ -30,14 +31,14 @@ const SizeInput = styled.input`
 
 const Button = styled.button`
   padding: 8px 16px;
-  background-color: #4CAF50;
-  color: white;
+  background-color: #FFE082;
+  color: #333;
   border: none;
-  border-radius: 4px;
+  border-radius: 16px;
   cursor: pointer;
   
   &:hover {
-    background-color: #45a049;
+    background-color: #e7ae00;
   }
 `;
 
@@ -71,10 +72,10 @@ const Canvas = ({ socket, roomId, userId, username }) => {
           value={size}
           onChange={(e) => setSize(parseInt(e.target.value))}
         />
-        <Button onClick={() => setTool('pen')} style={{ backgroundColor: tool === 'pen' ? '#45a049' : '#4CAF50' }}>
+        <Button onClick={() => setTool('pen')} style={{ backgroundColor: tool === 'pen' ? '#e7ae00' : '#FFE082' }}>
           Pen
         </Button>
-        <Button onClick={() => setTool('eraser')} style={{ backgroundColor: tool === 'eraser' ? '#45a049' : '#4CAF50' }}>
+        <Button onClick={() => setTool('eraser')} style={{ backgroundColor: tool === 'eraser' ? '#e7ae00' : '#FFE082' }}>
           Eraser
         </Button>
         <Button onClick={clearCanvas}>Clear Canvas</Button>

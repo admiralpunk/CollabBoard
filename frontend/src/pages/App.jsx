@@ -29,9 +29,10 @@ const LeftPanel = styled.div`
 `;
 
 const RightPanel = styled.div`
-  width: 300px;
+  width: 350px;
   display: flex;
   flex-direction: column;
+  gap: 20px;
 `;
 
 function App() {

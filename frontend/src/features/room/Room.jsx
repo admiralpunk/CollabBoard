@@ -25,15 +25,15 @@ const Input = styled.input`
 const Button = styled.button`
   width: 100%;
   padding: 10px;
-  background-color: #4CAF50;
-  color: white;
+  background-color: #FFE082;
+  color: #333;
   border: none;
-  border-radius: 4px;
+  border-radius: 16px;
   cursor: pointer;
   margin-top: 10px;
 
   &:hover {
-    background-color: #45a049;
+    background-color: #e7ae00;
   }
 `;
 

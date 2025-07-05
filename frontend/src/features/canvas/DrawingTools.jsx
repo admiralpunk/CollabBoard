@@ -18,14 +18,14 @@ const SizeInput = styled.input`
 
 const Button = styled.button`
   padding: 8px 16px;
-  background-color: #4CAF50;
-  color: white;
+  background-color: #FFE082;
+  color: #333;
   border: none;
-  border-radius: 4px;
+  border-radius: 16px;
   cursor: pointer;
   
   &:hover {
-    background-color: #45a049;
+    background-color: #e7ae00;
   }
 `;
 
@@ -47,13 +47,13 @@ const DrawingTools = ({ color, size, tool, onColorChange, onSizeChange, onToolCh
       />
       <Button 
         onClick={() => onToolChange('pen')}
-        style={{ backgroundColor: tool === 'pen' ? '#45a049' : '#4CAF50' }}
+        style={{ backgroundColor: tool === 'pen' ? '#e7ae00' : '#FFE082' }}
       >
         Pen
       </Button>
       <Button 
         onClick={() => onToolChange('eraser')}
-        style={{ backgroundColor: tool === 'eraser' ? '#45a049' : '#4CAF50' }}
+        style={{ backgroundColor: tool === 'eraser' ? '#e7ae00' : '#FFE082' }}
       >
         Eraser
       </Button>

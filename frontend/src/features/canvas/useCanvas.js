@@ -14,6 +14,10 @@ export const useCanvas = (canvasRef, socket, roomId, userId, username) => {
     canvas.width = 800;
     canvas.height = 600;
 
+    // Set white background
+    context.fillStyle = "white";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
     context.lineCap = "round";
     context.lineJoin = "round";
 
@@ -29,7 +33,9 @@ export const useCanvas = (canvasRef, socket, roomId, userId, username) => {
 
     socket.on("clear-canvas", () => {
       const ctx = canvas.getContext("2d");
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Clear and fill with white background
+      ctx.fillStyle = "white";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
     });
 
     return () => {
@@ -85,7 +91,9 @@ export const useCanvas = (canvasRef, socket, roomId, userId, username) => {
   const clearCanvas = () => {
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
-    context.clearRect(0, 0, canvas.width, canvas.height);
+    // Clear and fill with white background
+    context.fillStyle = "white";
+    context.fillRect(0, 0, canvas.width, canvas.height);
     socket.emit("clear-canvas", roomId);
   };
 

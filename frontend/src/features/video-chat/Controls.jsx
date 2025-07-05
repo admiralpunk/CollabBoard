@@ -12,17 +12,17 @@ const ControlBar = styled.div`
 
 const ControlButton = styled.button`
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: 16px;
   border: none;
-  background: ${props => props.$active ? '#dc3545' : '#4CAF50'};
-  color: white;
+  background: ${props => props.$active ? '#FFB74D' : '#FFE082'};
+  color: #333;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 5px;
 
   &:hover {
-    opacity: 0.9;
+    background: ${props => props.$active ? '#FFB74D' : '#e7ae00'};
   }
 `;
 
