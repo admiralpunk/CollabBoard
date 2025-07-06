@@ -76,6 +76,20 @@ class RoomService {
     return this.userNames.delete(socketId);
   }
 
+  // Check if username exists in room
+  isUsernameTakenInRoom(io, roomId, username) {
+    const socketsInRoom = Array.from(
+      io.sockets.adapter.rooms[roomId]?.sockets 
+        ? Object.keys(io.sockets.adapter.rooms[roomId].sockets) 
+        : []
+    );
+    
+    return socketsInRoom.some(socketId => {
+      const existingUsername = this.getUsername(socketId);
+      return existingUsername === username;
+    });
+  }
+
   // Build username map for a room
   buildUsernameMap(io, roomId) {
     const socketsInRoom = Array.from(

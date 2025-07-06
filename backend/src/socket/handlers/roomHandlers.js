@@ -1,6 +1,14 @@
 import roomService from '../../services/RoomService.js';
 
 export const handleJoinRoom = (socket, io) => ({ roomId, userId, username }) => {
+  // Check if username is already taken in this room
+  if (roomService.isUsernameTakenInRoom(io, roomId, username)) {
+    socket.emit("username-taken", { 
+      message: `Username "${username}" is already taken in this room. Please choose a different username.` 
+    });
+    return;
+  }
+
   socket.join(roomId);
   
   // Create room if it doesn't exist

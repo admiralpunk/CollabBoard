@@ -319,7 +319,16 @@ export const usePeerConnection = (socket, roomId, stream, myId) => {
 
   // Setup socket event listeners
   useEffect(() => {
-    if (!stream || !roomId || !socket || !myId) return;
+    if (!stream || !roomId || !socket || !myId) {
+      console.log(`[usePeerConnection] Setup skipped - missing dependencies:`, {
+        hasStream: !!stream,
+        hasRoomId: !!roomId,
+        hasSocket: !!socket,
+        hasMyId: !!myId,
+        myId: myId
+      });
+      return;
+    }
     
     console.log(`[usePeerConnection] Setting up with roomId: ${roomId}, myId: ${myId}`);
     setStreams({ local: stream });
@@ -357,6 +366,14 @@ export const usePeerConnection = (socket, roomId, stream, myId) => {
       peersRef.current = {};
     };
   }, [roomId, stream, socket, myId]);
+
+  // Separate effect to handle local stream updates
+  useEffect(() => {
+    if (stream) {
+      console.log(`[usePeerConnection] Local stream available, updating streams`);
+      setStreams(prev => ({ ...prev, local: stream }));
+    }
+  }, [stream]);
 
   // Debug effect
   useEffect(() => {

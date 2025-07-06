@@ -29,6 +29,12 @@ const VideoGrid = ({ streams, username, usernameMap }) => {
     console.log("VideoGrid: Updating streams", streams);
     console.log("VideoGrid: Stream keys", Object.keys(streams));
     console.log("VideoGrid: Stream count", Object.keys(streams).length);
+    console.log("VideoGrid: All streams details", Object.entries(streams).map(([id, stream]) => ({
+      id,
+      hasStream: !!stream,
+      streamId: stream?.id,
+      trackCount: stream?.getTracks().length
+    })));
     
     Object.entries(streams).forEach(([peerId, stream]) => {
       console.log(`VideoGrid: Processing stream for ${peerId}:`, stream);
@@ -64,11 +70,14 @@ const VideoGrid = ({ streams, username, usernameMap }) => {
   return (
     <Grid>
       {Object.entries(streams).map(([peerId, stream]) => {
-        console.log(`VideoGrid: Rendering video for ${peerId}`);
+        console.log(`VideoGrid: Rendering video for ${peerId}, has stream: ${!!stream}`);
         return (
           <VideoContainer key={peerId}>
             <Video
-              ref={el => videoRefs.current[peerId] = el}
+              ref={el => {
+                videoRefs.current[peerId] = el;
+                console.log(`VideoGrid: Video ref set for ${peerId}:`, !!el);
+              }}
               autoPlay
               playsInline
               muted={peerId === 'local'}
