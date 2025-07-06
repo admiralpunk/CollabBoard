@@ -62,7 +62,9 @@ const RoomPage = () => {
   const [notification, setNotification] = useState("");
   const [usernameMap, setUsernameMap] = useState({});
   const [isUsernameSet, setIsUsernameSet] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
   const videoChatRef = useRef();
+  const joinTimeoutRef = useRef(null);
 
   // Get username from URL query parameter
   const urlUsername = searchParams.get('username');
@@ -129,6 +131,13 @@ const RoomPage = () => {
       setNotification(message);
       setUsername(""); // Reset username so user can enter a new one
       setIsUsernameSet(false);
+      setIsJoining(false);
+      
+      // Clear any pending join timeout
+      if (joinTimeoutRef.current) {
+        clearTimeout(joinTimeoutRef.current);
+        joinTimeoutRef.current = null;
+      }
     });
 
     // Cleanup socket connection when the component unmounts
@@ -154,27 +163,60 @@ const RoomPage = () => {
   }, [urlUsername, username]);
 
   useEffect(() => {
-    if (socket && socket.connected && roomId && username && !isUsernameSet) {
+    if (socket && socket.connected && roomId && username && !isUsernameSet && !isJoining) {
       console.log("Joining room:", { roomId, userId, username });
-      socket.emit("join-room", { roomId, userId, username });
-      socket.emit("join", roomId);
-      setIsUsernameSet(true);
-    } else if (socket && !socket.connected && roomId && username) {
-      socket.once("connect", () => {
-        console.log("Socket connected, joining room:", { roomId, userId, username });
+      setIsJoining(true);
+      
+      // Clear any existing timeout
+      if (joinTimeoutRef.current) {
+        clearTimeout(joinTimeoutRef.current);
+      }
+      
+      // Add a small delay to prevent rapid joining
+      joinTimeoutRef.current = setTimeout(() => {
         socket.emit("join-room", { roomId, userId, username });
         socket.emit("join", roomId);
         setIsUsernameSet(true);
+        setIsJoining(false);
+      }, 500); // 500ms delay
+      
+    } else if (socket && !socket.connected && roomId && username && !isJoining) {
+      socket.once("connect", () => {
+        console.log("Socket connected, joining room:", { roomId, userId, username });
+        setIsJoining(true);
+        
+        // Clear any existing timeout
+        if (joinTimeoutRef.current) {
+          clearTimeout(joinTimeoutRef.current);
+        }
+        
+        // Add a small delay to prevent rapid joining
+        joinTimeoutRef.current = setTimeout(() => {
+          socket.emit("join-room", { roomId, userId, username });
+          socket.emit("join", roomId);
+          setIsUsernameSet(true);
+          setIsJoining(false);
+        }, 500); // 500ms delay
       });
     }
-  }, [socket, roomId, username, isUsernameSet, userId]);
+  }, [socket, roomId, username, isUsernameSet, userId, isJoining]);
 
   // Reset isUsernameSet when username changes (for duplicate username handling)
   useEffect(() => {
     if (username && isUsernameSet) {
       setIsUsernameSet(false);
+      setIsJoining(false);
     }
   }, [username]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (joinTimeoutRef.current) {
+        clearTimeout(joinTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleSetUsername = (name) => {
     setUsername(name);

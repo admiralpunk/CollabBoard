@@ -1,14 +1,36 @@
 import roomService from '../../services/RoomService.js';
 
 export const handleJoinRoom = (socket, io) => ({ roomId, userId, username }) => {
-  // Check if username is already taken in this room
-  if (roomService.isUsernameTakenInRoom(io, roomId, username)) {
+  console.log(`[handleJoinRoom] ${socket.id} trying to join room ${roomId} with username "${username}" and userId "${userId}"`);
+  
+  // Check if user already has an active connection
+  if (roomService.hasActiveConnection(userId)) {
+    const existingSocketId = roomService.getUserConnection(userId);
+    console.log(`[handleJoinRoom] User ${userId} already has active connection ${existingSocketId}, rejecting new connection`);
+    socket.emit("username-taken", { 
+      message: `You already have an active connection. Please wait a moment before trying again.` 
+    });
+    return;
+  }
+  
+  // Debug current state
+  roomService.debugState(io);
+  
+  // Check if username is taken by a different user
+  if (roomService.isUsernameTakenByUser(io, roomId, username, userId)) {
+    console.log(`[handleJoinRoom] Username "${username}" is taken by a different user in room ${roomId}`);
     socket.emit("username-taken", { 
       message: `Username "${username}" is already taken in this room. Please choose a different username.` 
     });
     return;
   }
 
+  console.log(`[handleJoinRoom] Username "${username}" is available or belongs to same user, proceeding with join`);
+  
+  // Remove any existing username for this socket (in case of reconnection)
+  roomService.removeUsername(socket.id);
+  
+  // Join the room
   socket.join(roomId);
   
   // Create room if it doesn't exist
@@ -21,6 +43,9 @@ export const handleJoinRoom = (socket, io) => ({ roomId, userId, username }) => 
   socket._userId = userId;
   socket._roomId = roomId;
   roomService.setUsername(socket.id, username);
+  
+  // Track this user connection
+  roomService.setUserConnection(userId, socket.id);
   
   // Get room data
   const users = roomService.getUsersInRoom(roomId);
@@ -90,5 +115,37 @@ export const handleDisconnecting = (socket, io) => () => {
     }
   });
   
+  // Clean up connection tracking
+  if (socket._userId) {
+    roomService.removeUserConnection(socket._userId, socket.id);
+  }
+  roomService.removeUsername(socket.id);
+};
+
+export const handleDisconnect = (socket, io) => () => {
+  console.log(`[backend] ${socket.id} disconnected`);
+  
+  // Ensure cleanup happens even if disconnecting event didn't fire
+  Object.keys(socket.rooms).forEach(room => {
+    if (room !== socket.id) {
+      socket.to(room).emit("peer-left", socket.id);
+      
+      // Remove user from room's user set and emit updated user count
+      if (socket._userId) {
+        const result = roomService.removeUserFromRoom(room, socket._userId);
+        if (result) {
+          io.to(room).emit("user-left", { 
+            userId: socket._userId, 
+            userCount: result.userCount 
+          });
+        }
+      }
+    }
+  });
+  
+  // Clean up connection tracking
+  if (socket._userId) {
+    roomService.removeUserConnection(socket._userId, socket.id);
+  }
   roomService.removeUsername(socket.id);
 }; 

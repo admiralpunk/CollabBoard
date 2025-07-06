@@ -2,6 +2,7 @@ import {
   handleJoinRoom,
   handleJoin,
   handleDisconnecting,
+  handleDisconnect,
   handleDraw,
   handleClearCanvas,
   handleChatMessage,
@@ -16,6 +17,7 @@ export const setupSocketEvents = (io) => {
     socket.on("join-room", handleJoinRoom(socket, io));
     socket.on("join", handleJoin(socket, io));
     socket.on("disconnecting", handleDisconnecting(socket, io));
+    socket.on("disconnect", handleDisconnect(socket, io));
 
     // Canvas events
     socket.on("draw", handleDraw(socket));

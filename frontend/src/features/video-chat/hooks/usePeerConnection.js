@@ -367,14 +367,6 @@ export const usePeerConnection = (socket, roomId, stream, myId) => {
     };
   }, [roomId, stream, socket, myId]);
 
-  // Separate effect to handle local stream updates
-  useEffect(() => {
-    if (stream) {
-      console.log(`[usePeerConnection] Local stream available, updating streams`);
-      setStreams(prev => ({ ...prev, local: stream }));
-    }
-  }, [stream]);
-
   // Debug effect
   useEffect(() => {
     console.log(`[usePeerConnection] Current state:`, {
