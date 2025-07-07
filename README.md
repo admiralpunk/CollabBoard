@@ -2,7 +2,7 @@
 
 CollabBoard is a modern, full-stack collaborative whiteboard platform that empowers teams to brainstorm, teach, and create together in real time. Featuring live drawing, instant chat, and integrated video conferencing, CollabBoard delivers a seamless, interactive experience for remote collaboration.
 
-![CollabBoard Screenshot](https://github.com/user-attachments/assets/4238d20d-c070-476b-b630-bcf27ee70f9f)
+![CollabBoard Screenshot](https://github.com/user-attachments/assets/e368fbbf-f32f-4512-8e21-6ccaa8daa848)
 
 ## Features
 
