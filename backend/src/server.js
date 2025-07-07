@@ -5,11 +5,21 @@ import { config } from './config/index.js';
 import { corsMiddleware } from './middleware/cors.js';
 import { setupSocketEvents } from './socket/events.js';
 import logger from './utils/logger.js';
+import rateLimit from 'express-rate-limit';
 
 const app = express();
 
 // Middleware
 app.use(corsMiddleware);
+
+// Rate limiting middleware: 100 requests per 15 minutes per IP
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  standardHeaders: true, // Return rate limit info in the RateLimit-* headers
+  legacyHeaders: false, // Disable the X-RateLimit-* headers
+});
+app.use(limiter);
 
 // Create HTTP server
 const httpServer = createServer(app);
