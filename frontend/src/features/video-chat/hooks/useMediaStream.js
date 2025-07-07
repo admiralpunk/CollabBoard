@@ -10,11 +10,11 @@ export const useMediaStream = () => {
   useEffect(() => {
     const initStream = async () => {
       try {
-        console.log('[useMediaStream] Requesting media permissions...');
+        // Removed console.log('[useMediaStream] Requesting media permissions...');
         
         // Stop any existing tracks before requesting new ones
         if (streamRef.current) {
-          console.log('[useMediaStream] Stopping existing tracks...');
+          // Removed console.log('[useMediaStream] Stopping existing tracks...');
           streamRef.current.getTracks().forEach(track => track.stop());
         }
 
@@ -23,12 +23,12 @@ export const useMediaStream = () => {
           audio: true
         });
         
-        console.log('[useMediaStream] Got media stream:', newStream.id);
+        // Removed console.log('[useMediaStream] Got media stream:', newStream.id);
         streamRef.current = newStream;
         setStream(newStream);
         setError(null);
       } catch (error) {
-        console.error('[useMediaStream] Error accessing media devices:', error);
+        // Removed console.error('[useMediaStream] Error accessing media devices:', error);
         setError(error.message);
       }
     };
@@ -38,7 +38,7 @@ export const useMediaStream = () => {
     // Cleanup function to stop all tracks when component unmounts
     return () => {
       if (streamRef.current) {
-        console.log('[useMediaStream] Cleanup: stopping tracks...');
+        // Removed console.log('[useMediaStream] Cleanup: stopping tracks...');
         streamRef.current.getTracks().forEach(track => track.stop());
         streamRef.current = null;
       }

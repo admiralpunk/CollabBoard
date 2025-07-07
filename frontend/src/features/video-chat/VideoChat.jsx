@@ -23,18 +23,6 @@ const VideoChat = forwardRef(({ socket, roomId, userId, username, usernameMap = 
     stopStream
   }), [stopStream]);
 
-  console.log("VideoChat Debug Info:", {
-    myId,
-    roomId,
-    peerCount,
-    streamCount: Object.keys(streams).length,
-    streams: Object.keys(streams),
-    connectionStatus,
-    hasLocalStream: !!stream,
-    localStreamId: stream?.id,
-    allStreams: streams
-  });
-
   return (
     <div>
       <ErrorMessage message={error} />

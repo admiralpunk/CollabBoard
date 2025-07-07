@@ -75,9 +75,6 @@ const RoomPage = () => {
   useEffect(() => {
     // Connect to backend socket
     const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_BACKEND_URL_DEV;
-    
-    console.log("Connecting to backend:", backendUrl);
-    console.log("Using transports:", ["polling"]);
     const newSocket = io(backendUrl, { 
       transports: ["polling"],
       upgrade: false,
@@ -91,44 +88,36 @@ const RoomPage = () => {
 
     // Connection event handlers
     newSocket.on("connect", () => {
-      console.log("Connected to backend");
       setConnectionStatus("connected");
     });
 
     newSocket.on("connect_error", (error) => {
-      console.error("Connection error:", error);
       setConnectionStatus("error");
     });
 
     newSocket.on("disconnect", (reason) => {
-      console.log("Disconnected from backend:", reason);
       setConnectionStatus("disconnected");
     });
 
     // Listen for user-joined and user-left events
     newSocket.on("user-joined", ({ userCount }) => {
-      console.log("user-joined event received", userCount);
       setUserCount(userCount);
     });
 
     newSocket.on("user-left", ({ userCount }) => {
-      console.log("user-left event received", userCount);
       setUserCount(userCount);
     });
 
     newSocket.on("room-created", ({ roomId }) => {
-      console.log("room-created event received", roomId);
       setNotification(`Room with name ${roomId} does not exist. Creating one.`);
       setTimeout(() => setNotification(""), 3000);
     });
 
     newSocket.on("usernames-update", ({ usernameMap }) => {
-      console.log("usernames-update event received", usernameMap);
       setUsernameMap(usernameMap);
     });
 
     newSocket.on("all-users", ({ users, usernameMap }) => {
-      console.log("all-users event received", { users, usernameMap });
       setUserCount(users.length);
       if (usernameMap) setUsernameMap(usernameMap);
     });
@@ -228,7 +217,6 @@ const RoomPage = () => {
   useEffect(() => {
     const shouldShowPopup = localStorage.getItem('showUsernamePopup') === 'true';
     if (shouldShowPopup) {
-      console.log("Found popup state in localStorage, showing popup");
       setShowPopup(true);
       popupShownRef.current = true;
     }
@@ -435,9 +423,6 @@ const RoomPage = () => {
               <Canvas socket={socket} roomId={roomId} userId={userId} username={username} />
             </LeftPanel>
             <RightPanel>
-              {/* Debug info */}
-              {console.log("VideoChat render state:", { isUsernameSet, username, userCount, hasSocket: !!socket })}
-              
               {/* Only render VideoChat if username is properly set and validated */}
               {isUsernameSet && username ? (
                 <VideoChat 

@@ -26,20 +26,8 @@ const VideoGrid = ({ streams, username, usernameMap }) => {
   const videoRefs = useRef({});
 
   useEffect(() => {
-    console.log("VideoGrid: Updating streams", streams);
-    console.log("VideoGrid: Stream keys", Object.keys(streams));
-    console.log("VideoGrid: Stream count", Object.keys(streams).length);
-    console.log("VideoGrid: All streams details", Object.entries(streams).map(([id, stream]) => ({
-      id,
-      hasStream: !!stream,
-      streamId: stream?.id,
-      trackCount: stream?.getTracks().length
-    })));
-    
     Object.entries(streams).forEach(([peerId, stream]) => {
-      console.log(`VideoGrid: Processing stream for ${peerId}:`, stream);
       if (videoRefs.current[peerId] && stream) {
-        console.log("Setting stream for peer:", peerId);
         const videoElement = videoRefs.current[peerId];
         
         // Only set srcObject if it's different
@@ -52,31 +40,24 @@ const VideoGrid = ({ streams, username, usernameMap }) => {
             playPromise.catch(e => {
               // Only log errors that aren't about interrupted play requests
               if (e.name !== 'AbortError') {
-                console.error("Error playing video for peer:", peerId, e);
               }
             });
           }
         }
       } else if (!videoRefs.current[peerId]) {
-        console.log(`VideoGrid: No video ref for ${peerId}`);
       } else if (!stream) {
-        console.log(`VideoGrid: No stream for ${peerId}`);
       }
     });
   }, [streams]);
 
-  console.log("VideoGrid: Rendering", Object.keys(streams).length, "video containers");
-  
   return (
     <Grid>
       {Object.entries(streams).map(([peerId, stream]) => {
-        console.log(`VideoGrid: Rendering video for ${peerId}, has stream: ${!!stream}`);
         return (
           <VideoContainer key={peerId}>
             <Video
               ref={el => {
                 videoRefs.current[peerId] = el;
-                console.log(`VideoGrid: Video ref set for ${peerId}:`, !!el);
               }}
               autoPlay
               playsInline
