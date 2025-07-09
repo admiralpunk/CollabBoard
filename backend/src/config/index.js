@@ -5,7 +5,7 @@ dotenv.config();
 
 export const config = {
   // Server configuration
-  port: process.env.PORT || 3000,
+  port: Number(process.env.PORT) || 3000,
   corsOrigin: process.env.CORS_ORIGIN || process.env.CORS_ORIGIN_DEV || '*',
   
   // Socket.IO configuration
