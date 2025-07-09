@@ -44,7 +44,7 @@ export const useCanvas = (canvasRef, socket, roomId, userId, username) => {
     };
   }, [socket]);
 
-  const startDrawing = (e) => {
+  const startDrawing = (e, tool, color, size) => {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -55,11 +55,11 @@ export const useCanvas = (canvasRef, socket, roomId, userId, username) => {
     const context = canvas.getContext("2d");
     context.beginPath();
     context.moveTo(x, y);
-    context.strokeStyle = tool === "pen" ? color : "#FFFFFF";
+    context.strokeStyle = tool === "eraser" ? "#FFFFFF" : color;
     context.lineWidth = size;
   };
 
-  const draw = (e) => {
+  const draw = (e, tool, color, size) => {
     if (!isDrawing) return;
 
     const canvas = canvasRef.current;
@@ -77,7 +77,7 @@ export const useCanvas = (canvasRef, socket, roomId, userId, username) => {
       y0: lastPosition.current.y,
       x1: x,
       y1: y,
-      color: tool === "pen" ? color : "#FFFFFF",
+      color: tool === "eraser" ? "#FFFFFF" : color,
       size,
     });
 
