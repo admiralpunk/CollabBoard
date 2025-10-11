@@ -11,11 +11,35 @@ const AppContainer = styled.div`
 
 function App() {
   const navigate = useNavigate();
+  const [backendReady, setBackendReady] = useState(false);
+
+  // Function to check backend health
+  const checkBackendHealth = async () => {
+    try {
+      const response = await fetch("https://collabboard-6kva.onrender.com/health");
+      if (response.ok) {
+        setBackendReady(true);
+      } else {
+        alert("Backend is not ready. Please wait in 50 seconds...");
+        setTimeout(checkBackendHealth, 50000); // wait 50 seconds and retry
+      }
+    } catch (error) {
+      alert("Cannot connect to backend. Retrying in 50 seconds...");
+      setTimeout(checkBackendHealth, 50000); // wait 50 seconds and retry
+    }
+  };
+
+  useEffect(() => {
+    checkBackendHealth();
+  }, []);
 
   const handleJoinRoom = (id, name) => {
-    // Navigate to the room URL with username as query parameter
     navigate(`/${id}?username=${encodeURIComponent(name)}`);
   };
+
+  if (!backendReady) {
+    return <AppContainer>Loading... Please wait for backend to start.</AppContainer>;
+  }
 
   return (
     <AppContainer>
