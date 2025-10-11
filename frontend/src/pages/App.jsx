@@ -20,7 +20,7 @@ function App() {
       if (response.ok) {
         setBackendReady(true);
       } else {
-        alert("Backend is not ready. Please wait in 50 seconds...");
+        alert("Backend is not ready. Please wait 50 seconds for backend to spin up...");
         setTimeout(checkBackendHealth, 50000); // wait 50 seconds and retry
       }
     } catch (error) {
@@ -38,7 +38,7 @@ function App() {
   };
 
   if (!backendReady) {
-    return <AppContainer>Loading... Please wait for backend to start.</AppContainer>;
+    return <AppContainer>Please wait 50 seconds for backend to spin up.</AppContainer>;
   }
 
   return (
