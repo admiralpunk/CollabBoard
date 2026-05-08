@@ -9,16 +9,20 @@ import rateLimit from 'express-rate-limit';
 
 const app = express();
 
+// ADD THIS LINE
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(corsMiddleware);
 
 // Rate limiting middleware: 100 requests per 15 minutes per IP
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  standardHeaders: true, // Return rate limit info in the RateLimit-* headers
-  legacyHeaders: false, // Disable the X-RateLimit-* headers
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
 });
+
 app.use(limiter);
 
 // Create HTTP server
@@ -37,10 +41,10 @@ setupSocketEvents(io);
 
 // Basic health check route
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
+  res.json({
+    status: 'ok',
     timestamp: new Date().toISOString(),
-    environment: config.nodeEnv 
+    environment: config.nodeEnv
   });
 });
 
@@ -52,4 +56,4 @@ httpServer.listen(config.port, '0.0.0.0', () => {
   logger.info(`Socket Transports: ${config.socketTransports.join(', ')}`);
 });
 
-export default app; 
+export default app;
