@@ -9,6 +9,9 @@ const AppContainer = styled.div`
   padding: 20px;
 `;
 
+// Fallback to localhost if the environment variable isn't specified
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+
 function App() {
   const navigate = useNavigate();
   const [backendReady, setBackendReady] = useState(false);
@@ -16,11 +19,14 @@ function App() {
   // Function to check backend health
   const checkBackendHealth = async () => {
     try {
-      const response = await fetch("https://collabboard-6kva.onrender.com/health");
+      // Dynamic health check using your configuration variable
+      const response = await fetch(`${BACKEND_URL}/health`);
       if (response.ok) {
         setBackendReady(true);
       } else {
-        alert("Backend is not ready. Please wait 50 seconds for backend to spin up...");
+        alert(
+          "Backend is not ready. Please wait 50 seconds for backend to spin up...",
+        );
         setTimeout(checkBackendHealth, 50000); // wait 50 seconds and retry
       }
     } catch (error) {
@@ -38,7 +44,11 @@ function App() {
   };
 
   if (!backendReady) {
-    return <AppContainer>Please wait 50 seconds for backend to spin up.</AppContainer>;
+    return (
+      <AppContainer>
+        Please wait 50 seconds for backend to spin up.
+      </AppContainer>
+    );
   }
 
   return (
