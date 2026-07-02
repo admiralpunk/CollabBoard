@@ -1,4 +1,11 @@
 {
+  "name": "collabboard-root",
+  "version": "1.0.0",
+  "scripts": {
+    "preinstall": "npm install --prefix backend",
+    "build": "npm run build --prefix backend --if-present",
+    "start": "npm start --prefix backend"
+  },
   "dependencies": {
     "express-rate-limit": "^7.5.1",
     "simple-multi-peer": "^0.0.5",
