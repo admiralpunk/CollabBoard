@@ -49,8 +49,11 @@ app.get('/health', (req, res) => {
 });
 
 // Start server
-httpServer.listen(config.port, '0.0.0.0', () => {
-  logger.info(`Server running on port ${config.port}`);
+// Start server
+const PORT = process.env.PORT || config.port || 3000;
+
+httpServer.listen(PORT, '0.0.0.0', () => {
+  logger.info(`Server running on port ${PORT}`);
   logger.info(`Environment: ${config.nodeEnv}`);
   logger.info(`CORS Origin: ${config.corsOrigin}`);
   logger.info(`Socket Transports: ${config.socketTransports.join(', ')}`);
