@@ -107,3 +107,4 @@ google-cloud-sdk/
 
 # Vercel
 .vercel
+.env*

@@ -1,5 +1,5 @@
 // Environment variables
-export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_BACKEND_URL_DEV;
+export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_BACKEND_URL_DEV || "http://localhost:3000";
 export const SOCKET_TRANSPORTS = import.meta.env.VITE_SOCKET_TRANSPORTS?.split(",") || ["websocket", "polling"];
 
 // STUN/TURN servers for WebRTC

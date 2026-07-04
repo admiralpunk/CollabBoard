@@ -74,7 +74,7 @@ const RoomPage = () => {
 
   useEffect(() => {
     // Connect to backend socket
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_BACKEND_URL_DEV;
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_BACKEND_URL_DEV || "http://localhost:3000";
     const newSocket = io(backendUrl, { 
       transports: ["polling"],
       upgrade: false,
@@ -165,7 +165,6 @@ const RoomPage = () => {
       // Add a small delay to prevent rapid joining
       joinTimeoutRef.current = setTimeout(() => {
         socket.emit("join-room", { roomId, userId, username });
-        socket.emit("join", roomId);
         setIsUsernameSet(true);
         setIsJoining(false);
       }, 500); // 500ms delay
@@ -183,7 +182,6 @@ const RoomPage = () => {
         // Add a small delay to prevent rapid joining
         joinTimeoutRef.current = setTimeout(() => {
           socket.emit("join-room", { roomId, userId, username });
-          socket.emit("join", roomId);
           setIsUsernameSet(true);
           setIsJoining(false);
         }, 500); // 500ms delay

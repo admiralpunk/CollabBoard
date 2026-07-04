@@ -1,151 +1,125 @@
-import roomService from '../../services/RoomService.js';
+import roomService from '../../services/RoomService.js'
 
 export const handleJoinRoom = (socket, io) => ({ roomId, userId, username }) => {
-  console.log(`[handleJoinRoom] ${socket.id} trying to join room ${roomId} with username "${username}" and userId "${userId}"`);
-  
+  if (!roomId || typeof roomId !== 'string') return
+  if (!userId || typeof userId !== 'string') return
+  if (!username || typeof username !== 'string') return
+  if (username.length < 1 || username.length > 30) return
+
   // Check if user already has an active connection
-  if (roomService.hasActiveConnection(userId)) {
-    const existingSocketId = roomService.getUserConnection(userId);
-    console.log(`[handleJoinRoom] User ${userId} already has active connection ${existingSocketId}, rejecting new connection`);
-    socket.emit("username-taken", { 
-      message: `You already have an active connection. Please wait a moment before trying again.` 
-    });
-    return;
-  }
-  
-  // Debug current state
-  roomService.debugState(io);
-  
-  // Check if username is taken by a different user
-  if (roomService.isUsernameTakenByUser(io, roomId, username, userId)) {
-    console.log(`[handleJoinRoom] Username "${username}" is taken by a different user in room ${roomId}`);
-    socket.emit("username-taken", { 
-      message: `Username "${username}" is already taken in this room. Please choose a different username.` 
-    });
-    return;
+  if (roomService.hasActiveConnection(userId, io)) {
+    const existingSocketId = roomService.getUserConnection(userId)
+    socket.emit("username-taken", {
+      message: `You already have an active connection. Please wait a moment before trying again.`
+    })
+    return
   }
 
-  console.log(`[handleJoinRoom] Username "${username}" is available or belongs to same user, proceeding with join`);
-  
-  // Remove any existing username for this socket (in case of reconnection)
-  roomService.removeUsername(socket.id);
-  
-  // Join the room
-  socket.join(roomId);
-  
-  // Create room if it doesn't exist
-  const roomCreated = roomService.createRoom(roomId);
-  
-  // Add user to room
-  const result = roomService.addUserToRoom(roomId, userId);
-  
-  // Store user info on socket
-  socket._userId = userId;
-  socket._roomId = roomId;
-  roomService.setUsername(socket.id, username);
-  
-  // Track this user connection
-  roomService.setUserConnection(userId, socket.id);
-  
-  // Get room data
-  const users = roomService.getUsersInRoom(roomId);
-  const usernameMap = roomService.buildUsernameMap(io, roomId);
-  
-  // Emit events
-  socket.emit("all-users", { users, usernameMap });
-  
-  if (roomCreated) {
-    socket.emit("room-created", { roomId });
+  roomService.debugState(io)
+
+  if (roomService.isUsernameTakenByUser(io, roomId, username, userId)) {
+    socket.emit("username-taken", {
+      message: `Username "${username}" is already taken in this room. Please choose a different username.`
+    })
+    return
   }
-  
-  io.to(roomId).emit("usernames-update", { usernameMap });
-  
+
+  roomService.removeUsername(socket.id)
+
+  socket.join(roomId)
+
+  const roomCreated = roomService.createRoom(roomId)
+  const result = roomService.addUserToRoom(roomId, userId)
+
+  socket._userId = userId
+  socket._roomId = roomId
+  roomService.setUsername(socket.id, username)
+
+  roomService.setUserConnection(userId, socket.id)
+
+  const users = roomService.getUsersInRoom(roomId)
+  const usernameMap = roomService.buildUsernameMap(io, roomId)
+
+  socket.emit("all-users", { users, usernameMap })
+
+  if (roomCreated) {
+    socket.emit("room-created", { roomId })
+  }
+
+  // Send current canvas state to the joining user
+  const canvasHistory = roomService.getCanvasHistory(roomId)
+  if (canvasHistory.length > 0) {
+    socket.emit("canvas-state", canvasHistory)
+  }
+
+  io.to(roomId).emit("usernames-update", { usernameMap })
+
   if (result && result.isNewUser) {
     io.to(roomId).emit("user-joined", {
       userId,
       userCount: result.userCount,
-    });
+    })
   }
-};
+}
 
 export const handleJoin = (socket, io) => (room) => {
-  console.log(`[backend] ${socket.id} requesting WebRTC join for room ${room}`);
-  
-  // Check if socket is already in the room
-  const isInRoom = socket.rooms.hasOwnProperty(room);
-  console.log(`[backend] ${socket.id} already in room ${room}: ${isInRoom}`);
-  
+  if (!room || typeof room !== 'string') return
+
+  const isInRoom = socket.rooms.hasOwnProperty(room)
+
   if (!isInRoom) {
-    socket.join(room);
-    console.log(`[backend] ${socket.id} joined room ${room} for WebRTC`);
+    socket.join(room)
   }
-  
-  // Notify the new peer of all existing peers in the room (except itself)
+
   const clients = Array.from(
-    io.sockets.adapter.rooms[room]?.sockets 
-      ? Object.keys(io.sockets.adapter.rooms[room].sockets) 
+    io.sockets.adapter.rooms[room]?.sockets
+      ? Object.keys(io.sockets.adapter.rooms[room].sockets)
       : []
-  ).filter(id => id !== socket.id);
-  
-  console.log(`[backend] ${socket.id} peers in room ${room}:`, clients);
-  socket.emit("peers-in-room", clients);
-  
-  // Notify other peers in the room about the new peer
-  socket.to(room).emit("peer-joined", socket.id);
-  console.log(`[backend] ${socket.id} notified peers in room ${room} about new peer`);
-};
+  ).filter(id => id !== socket.id)
+
+  socket.emit("peers-in-room", clients)
+
+  socket.to(room).emit("peer-joined", socket.id)
+}
 
 export const handleDisconnecting = (socket, io) => () => {
-  console.log(`[backend] ${socket.id} disconnecting`);
-  
   Object.keys(socket.rooms).forEach(room => {
     if (room !== socket.id) {
-      socket.to(room).emit("peer-left", socket.id);
-      
-      // Remove user from room's user set and emit updated user count
+      socket.to(room).emit("peer-left", socket.id)
+
       if (socket._userId) {
-        const result = roomService.removeUserFromRoom(room, socket._userId);
+        const result = roomService.removeUserFromRoom(room, socket._userId)
         if (result) {
-          io.to(room).emit("user-left", { 
-            userId: socket._userId, 
-            userCount: result.userCount 
-          });
+          io.to(room).emit("user-left", {
+            userId: socket._userId,
+            userCount: result.userCount
+          })
         }
       }
     }
-  });
-  
-  // Clean up connection tracking
+  })
+
   if (socket._userId) {
-    roomService.removeUserConnection(socket._userId, socket.id);
+    roomService.removeUserConnection(socket._userId, socket.id)
   }
-  roomService.removeUsername(socket.id);
-};
+  roomService.removeUsername(socket.id)
+}
 
 export const handleDisconnect = (socket, io) => () => {
-  console.log(`[backend] ${socket.id} disconnected`);
-  
-  // Ensure cleanup happens even if disconnecting event didn't fire
-  Object.keys(socket.rooms).forEach(room => {
-    if (room !== socket.id) {
-      socket.to(room).emit("peer-left", socket.id);
-      
-      // Remove user from room's user set and emit updated user count
-      if (socket._userId) {
-        const result = roomService.removeUserFromRoom(room, socket._userId);
-        if (result) {
-          io.to(room).emit("user-left", { 
-            userId: socket._userId, 
-            userCount: result.userCount 
-          });
-        }
+  // Fallback cleanup only — primary cleanup happens in handleDisconnecting
+  // This catches edge cases where disconnecting didn't fire
+  if (socket._userId) {
+    const rooms = roomService.getUsersInRoom(socket._roomId)
+    if (rooms.length > 0 && socket._roomId) {
+      const result = roomService.removeUserFromRoom(socket._roomId, socket._userId)
+      if (result) {
+        io.to(socket._roomId).emit("user-left", {
+          userId: socket._userId,
+          userCount: result.userCount
+        })
       }
     }
-  });
-  
-  // Clean up connection tracking
-  if (socket._userId) {
-    roomService.removeUserConnection(socket._userId, socket.id);
+    roomService.removeUserConnection(socket._userId, socket.id)
   }
-  roomService.removeUsername(socket.id);
-}; 
+  roomService.removeUsername(socket.id)
+}

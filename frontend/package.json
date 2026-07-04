@@ -15,7 +15,6 @@
     "buffer": "^6.0.3",
     "dotenv": "^16.4.7",
     "events": "^3.3.0",
-    "node-pre-gyp": "^0.17.0",
     "process": "^0.11.10",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -23,8 +22,7 @@
     "simple-peer": "^9.11.1",
     "socket.io-client": "2.3.1",
     "styled-components": "^6.1.13",
-    "uuid": "^11.1.0",
-    "wrtc": "^0.4.7"
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

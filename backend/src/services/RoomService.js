@@ -1,9 +1,10 @@
 class RoomService {
   constructor() {
     this.rooms = new Map();
-    this.userNames = new Map(); // socket.id -> username
-    this.userConnections = new Map(); // userId -> socket.id (for tracking active connections)
-    this.connectionTimestamps = new Map(); // socket.id -> timestamp (for cleanup)
+    this.userNames = new Map();
+    this.userConnections = new Map();
+    this.connectionTimestamps = new Map();
+    this.canvasHistory = new Map();
   }
 
   // Room management
@@ -95,16 +96,37 @@ class RoomService {
     this.connectionTimestamps.delete(socketId);
   }
 
+  // Canvas history management
+  addDrawEvent(roomId, data) {
+    if (!this.canvasHistory.has(roomId)) {
+      this.canvasHistory.set(roomId, [])
+    }
+    this.canvasHistory.get(roomId).push(data)
+  }
+
+  getCanvasHistory(roomId) {
+    return this.canvasHistory.get(roomId) || []
+  }
+
+  clearCanvasHistory(roomId) {
+    this.canvasHistory.delete(roomId)
+  }
+
   // Check if user has an active connection
-  hasActiveConnection(userId) {
+  hasActiveConnection(userId, io) {
     const socketId = this.userConnections.get(userId);
     if (!socketId) return false;
-    
-    // Check if the socket still exists and is recent (within last 5 seconds)
-    const timestamp = this.connectionTimestamps.get(socketId);
-    const isRecent = timestamp && (Date.now() - timestamp) < 5000;
-    
-    return isRecent;
+
+    // Check if the socket actually exists and is still connected
+    const socket = io.sockets.sockets[socketId]
+    if (socket && socket.connected) {
+      return true
+    }
+
+    // Socket no longer exists or is disconnected — clean up stale entry
+    this.userConnections.delete(userId)
+    this.connectionTimestamps.delete(socketId)
+    return false
   }
 
   // Check if username exists in room
