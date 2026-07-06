@@ -63,7 +63,7 @@ const ChatContainer = styled.div`
     inset 0 1px 0 rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(255, 224, 130, 0.5);
   overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(10px);
 
   &:hover {
@@ -128,12 +128,12 @@ const Chat = ({ socket, roomId, username, usernameMap }) => {
 
   return (
     <ChatContainer $minimized={isMinimized}>
-      <ChatHeader onClick={toggleMinimize}>
+      <ChatHeader onClick={toggleMinimize} aria-label={isMinimized ? "Expand chat" : "Minimize chat"}>
         <span>Chat</span>
         <MinimizeButton onClick={(e) => {
           e.stopPropagation()
           toggleMinimize()
-        }}>
+        }} aria-label={isMinimized ? "Expand" : "Minimize"}>
           {isMinimized ? '+' : '−'}
         </MinimizeButton>
       </ChatHeader>

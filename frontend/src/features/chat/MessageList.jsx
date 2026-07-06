@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react"
 import styled from "styled-components"
+import EmptyState from "../../shared/components/EmptyState"
 
 const MessageListContainer = styled.div`
   flex-grow: 1;
@@ -92,15 +93,19 @@ const MessageList = ({ messages, username, typingUsers }) => {
   }, [messages])
 
   return (
-    <MessageListContainer>
-      {messages.map((message) => (
-        <Message key={message.id} $isSelf={message.sender === username}>
-          <strong>{message.sender}:</strong> {message.text}
-          <Timestamp>{formatTime(message.timestamp)}</Timestamp>
-        </Message>
-      ))}
+    <MessageListContainer role="log" aria-live="polite" aria-label="Chat messages">
+      {messages.length === 0 ? (
+        <EmptyState icon="💬" message="No messages yet. Start the conversation!" compact />
+      ) : (
+        messages.map((message) => (
+          <Message key={message.id} $isSelf={message.sender === username}>
+            <strong>{message.sender}:</strong> {message.text}
+            <Timestamp>{formatTime(message.timestamp)}</Timestamp>
+          </Message>
+        ))
+      )}
       {typingUsers && typingUsers.length > 0 && (
-        <TypingIndicator>
+        <TypingIndicator aria-live="polite">
           {typingUsers.join(", ")} {typingUsers.length === 1 ? "is" : "are"} typing...
         </TypingIndicator>
       )}

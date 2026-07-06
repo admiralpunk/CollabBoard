@@ -46,50 +46,50 @@
 
 ## Phase 3: UI/UX Improvements
 
-### Loading States (currently all plain text)
-- [ ] Replace `"Please wait 50 seconds..."` with loading spinner + progress indicator
-- [ ] Add skeleton loaders for chat (message placeholders) and video grid (dark rectangles)
-- [ ] Add spinner overlay on Join/Create buttons to prevent double-clicks
-- [ ] Show loading state in `VideoChat` while `getUserMedia` initializes
+### Loading States
+- [x] Replace `"Please wait 50 seconds..."` with loading spinner + progress indicator
+- [x] Add skeleton loaders for chat (message placeholders) and video grid (dark rectangles)
+- [x] Add spinner overlay on Join/Create buttons to prevent double-clicks
+- [x] Show loading state in `VideoChat` while `getUserMedia` initializes
 
 ### Error States
-- [ ] Replace all `alert()` calls with inline toast/notification components
-- [ ] Add dismiss button + retry action to `ErrorMessage.jsx`
-- [ ] Surface socket disconnection prominently ("Connection Lost — Reconnecting...")
-- [ ] Add `prefers-reduced-motion` support to all animations
+- [x] Replace all `alert()` calls with inline toast/notification components
+- [x] Add dismiss button + retry action to `ErrorMessage.jsx`
+- [x] Surface socket disconnection prominently ("Connection Lost — Reconnecting...")
+- [x] Add `prefers-reduced-motion` support to all animations
 
 ### Empty States
-- [ ] Chat: `"No messages yet. Start the conversation!"` with icon
-- [ ] Video: Style existing "No video streams available" consistently with design system
+- [x] Chat: `"No messages yet. Start the conversation!"` with icon
+- [x] Video: Style existing "No video streams available" consistently with design system
 
 ### Responsive Design
-- [ ] Replace hardcoded `RightPanel: 350px` with responsive breakpoints
-- [ ] Add `flex-wrap` to `ContentContainer` so panels wrap on narrow viewports
-- [ ] Make canvas responsive via `ResizeObserver` + CSS `max-width: 100%`
-- [ ] Add media queries for tablet (`768px`) and mobile (`480px`)
+- [x] Replace hardcoded `RightPanel: 350px` with responsive breakpoints
+- [x] Add `flex-wrap` to `ContentContainer` so panels wrap on narrow viewports
+- [x] Make canvas responsive via `ResizeObserver` + CSS `max-width: 100%`
+- [x] Add media queries for tablet (`768px`) and mobile (`480px`)
 - [ ] Use `clamp()` for font sizes instead of fixed pixels
 
 ### Design System
-- [ ] Establish CSS custom properties in `index.css` (colors, spacing, radii, shadows)
-- [ ] Migrate hardcoded values across styled-components to use CSS variables
-- [ ] Add `ThemeProvider` for future theming (dark mode)
-- [ ] Normalize border radii to 2-3 consistent values
-- [ ] Normalize button styles (primary `#FFE082`, secondary gray)
+- [x] Establish CSS custom properties in `index.css` (colors, spacing, radii, shadows)
+- [x] Migrate hardcoded values across styled-components to use CSS variables
+- [x] Add `ThemeProvider` for future theming (dark mode)
+- [x] Normalize border radii to 2-3 consistent values
+- [x] Normalize button styles (primary `#FFE082`, secondary gray)
 
 ### Accessibility
-- [ ] Add `aria-label` to all emoji-only buttons (`💬`, `🎤`, `🔇`, `📹`, `🎥`)
-- [ ] Add `role="alert"` to error messages + `aria-live="polite"` to chat list
-- [ ] Add focus trapping + `aria-modal` to username-taken popup
+- [x] Add `aria-label` to all emoji-only buttons (`💬`, `🎤`, `🔇`, `📹`, `🎥`)
+- [x] Add `role="alert"` to error messages + `aria-live="polite"` to chat list
+- [x] Add focus trapping + `aria-modal` to username-taken popup
 - [ ] Wrap canvas in focusable element with keyboard drawing (arrow keys)
-- [ ] Migrate all inline `style` objects to styled-components
+- [x] Migrate all inline `style` objects to styled-components
 
 ### Visual Polish
-- [ ] Remove `DrawingTools.jsx` dead code or integrate into `Canvas.jsx`
-- [ ] Fix `Controls.jsx` `$active` prop (inverted logic)
-- [ ] Add confirmation dialog before "Clear Canvas" (destructive, no undo)
-- [ ] Add hover/active states to all interactive elements
-- [ ] Add page transition when entering a room
-- [ ] Add toast/notification system for join/leave events
+- [x] Remove `DrawingTools.jsx` dead code or integrate into `Canvas.jsx`
+- [x] Fix `Controls.jsx` `$active` prop (inverted logic)
+- [x] Add confirmation dialog before "Clear Canvas" (destructive, no undo)
+- [x] Add hover/active states to all interactive elements
+- [x] Add page transition when entering a room
+- [x] Add toast/notification system for join/leave events
 
 ---
 

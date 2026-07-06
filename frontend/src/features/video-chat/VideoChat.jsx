@@ -3,6 +3,7 @@ import VideoGrid from "./VideoGrid"
 import Controls from "./Controls"
 import { usePeerConnection, useSocketId, useMediaStream } from "./hooks"
 import { ConnectionStatus, ErrorMessage } from "./components"
+import LoadingSpinner from "../../shared/components/LoadingSpinner"
 
 const VideoChat = forwardRef(({ socket, roomId, userId, username, usernameMap = {}, onLeaveRoom }, ref) => {
   const {
@@ -10,6 +11,7 @@ const VideoChat = forwardRef(({ socket, roomId, userId, username, usernameMap = 
     isAudioEnabled,
     isVideoEnabled,
     error,
+    loading,
     toggleAudio,
     toggleVideo,
     stopStream,
@@ -24,20 +26,29 @@ const VideoChat = forwardRef(({ socket, roomId, userId, username, usernameMap = 
 
   return (
     <div>
-      <ErrorMessage message={error} />
-      <ConnectionStatus
-        peerCount={peerCount}
-        streamCount={Object.keys(streams).length}
-        connectionStatus={connectionStatus}
+      <ErrorMessage
+        message={error}
+        onRetry={loading ? undefined : () => window.location.reload()}
       />
-      <VideoGrid streams={streams} username={username} usernameMap={usernameMap} />
-      <Controls
-        isAudioEnabled={isAudioEnabled}
-        isVideoEnabled={isVideoEnabled}
-        onToggleAudio={toggleAudio}
-        onToggleVideo={toggleVideo}
-        onLeave={onLeaveRoom}
-      />
+      {loading ? (
+        <LoadingSpinner size={32} label="Initializing camera and microphone..." />
+      ) : (
+        <>
+          <ConnectionStatus
+            peerCount={peerCount}
+            streamCount={Object.keys(streams).length}
+            connectionStatus={connectionStatus}
+          />
+          <VideoGrid streams={streams} username={username} usernameMap={usernameMap} />
+          <Controls
+            isAudioEnabled={isAudioEnabled}
+            isVideoEnabled={isVideoEnabled}
+            onToggleAudio={toggleAudio}
+            onToggleVideo={toggleVideo}
+            onLeave={onLeaveRoom}
+          />
+        </>
+      )}
     </div>
   )
 })

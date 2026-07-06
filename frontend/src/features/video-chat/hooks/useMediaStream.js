@@ -5,6 +5,7 @@ export const useMediaStream = () => {
   const [isAudioEnabled, setIsAudioEnabled] = useState(true)
   const [isVideoEnabled, setIsVideoEnabled] = useState(true)
   const [error, setError] = useState(null)
+  const [loading, setLoading] = useState(true)
   const streamRef = useRef(null)
 
   useEffect(() => {
@@ -24,6 +25,8 @@ export const useMediaStream = () => {
         setError(null)
       } catch (error) {
         setError(error.message)
+      } finally {
+        setLoading(false)
       }
     }
 
@@ -68,6 +71,7 @@ export const useMediaStream = () => {
     isAudioEnabled,
     isVideoEnabled,
     error,
+    loading,
     toggleAudio,
     toggleVideo,
     stopStream

@@ -104,7 +104,7 @@ const MessageInput = ({ onSendMessage, onTyping }) => {
   }
 
   return (
-    <InputContainer onSubmit={handleSubmit}>
+    <InputContainer onSubmit={handleSubmit} role="form" aria-label="Chat message form">
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <TextArea
           value={message}
@@ -113,12 +113,15 @@ const MessageInput = ({ onSendMessage, onTyping }) => {
           placeholder="Type a message... (Shift+Enter for newline)"
           rows={1}
           maxLength={MAX_LENGTH}
+          aria-label="Message input"
         />
-        <CharCount $over={message.length > MAX_LENGTH}>
+        <CharCount $over={message.length > MAX_LENGTH} aria-live="polite">
           {message.length}/{MAX_LENGTH}
         </CharCount>
       </div>
-      <SendButton type="submit" disabled={!message.trim()}>Send</SendButton>
+      <SendButton type="submit" disabled={!message.trim()} aria-label="Send message">
+        Send
+      </SendButton>
     </InputContainer>
   )
 }

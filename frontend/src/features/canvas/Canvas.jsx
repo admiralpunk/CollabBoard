@@ -1,6 +1,7 @@
-import { useRef, useCallback, useEffect } from 'react'
+import { useRef, useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useCanvas } from './hooks'
+import ConfirmationDialog from '../../shared/components/ConfirmationDialog'
 
 const CanvasContainer = styled.div`
   margin: 20px;
@@ -15,6 +16,7 @@ const StyledCanvas = styled.canvas`
   cursor: crosshair;
   background-color: white;
   touch-action: none;
+  max-width: 100%;
 `
 
 const TextOverlay = styled.textarea`
@@ -58,20 +60,40 @@ const Button = styled.button`
   border: none;
   border-radius: 16px;
   cursor: pointer;
+  transition: background-color 0.2s, transform 0.15s;
 
   &:hover {
     background-color: #e7ae00;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    transform: none;
   }
+
+  &:focus-visible {
+    outline: 2px solid #e7ae00;
+    outline-offset: 2px;
+  }
+`
+
+const ClearButton = styled(Button)`
+  background-color: #e74c3c;
+  color: white;
+
+  &:hover { background-color: #c0392b; }
 `
 
 const Canvas = ({ socket, roomId }) => {
   const canvasRef = useRef(null)
   const textInputRef = useRef(null)
+  const [showClearConfirm, setShowClearConfirm] = useState(false)
 
   const {
     color,
@@ -110,14 +132,34 @@ const Canvas = ({ socket, roomId }) => {
     }
   }, [commitText, cancelText])
 
+  const handleClearClick = () => {
+    setShowClearConfirm(true)
+  }
+
+  const confirmClear = () => {
+    clearCanvas()
+    setShowClearConfirm(false)
+  }
+
+  const isActive = (t) => tool === t
+
   return (
     <CanvasContainer>
+      {showClearConfirm && (
+        <ConfirmationDialog
+          title="Clear Canvas"
+          message="Are you sure you want to clear the entire canvas? This cannot be undone."
+          onConfirm={confirmClear}
+          onCancel={() => setShowClearConfirm(false)}
+        />
+      )}
       <ToolBar>
         <ColorPicker
           type="color"
           value={color}
           onChange={(e) => setColor(e.target.value)}
           disabled={tool === 'eraser'}
+          aria-label="Drawing color"
         />
         <SizeInput
           type="range"
@@ -125,28 +167,29 @@ const Canvas = ({ socket, roomId }) => {
           max="50"
           value={size}
           onChange={(e) => setSize(parseInt(e.target.value))}
+          aria-label="Brush size"
         />
-        <Button onClick={() => setTool('pen')} style={{ backgroundColor: tool === 'pen' ? '#e7ae00' : '#FFE082' }}>
+        <Button onClick={() => setTool('pen')} style={{ backgroundColor: isActive('pen') ? '#e7ae00' : '#FFE082' }} aria-label="Pen tool" aria-pressed={isActive('pen')}>
           Pen
         </Button>
-        <Button onClick={() => setTool('eraser')} style={{ backgroundColor: tool === 'eraser' ? '#e7ae00' : '#FFE082' }}>
+        <Button onClick={() => setTool('eraser')} style={{ backgroundColor: isActive('eraser') ? '#e7ae00' : '#FFE082' }} aria-label="Eraser tool" aria-pressed={isActive('eraser')}>
           Eraser
         </Button>
-        <Button onClick={() => setTool('rectangle')} style={{ backgroundColor: tool === 'rectangle' ? '#e7ae00' : '#FFE082' }}>
+        <Button onClick={() => setTool('rectangle')} style={{ backgroundColor: isActive('rectangle') ? '#e7ae00' : '#FFE082' }} aria-label="Rectangle tool" aria-pressed={isActive('rectangle')}>
           Rectangle
         </Button>
-        <Button onClick={() => setTool('circle')} style={{ backgroundColor: tool === 'circle' ? '#e7ae00' : '#FFE082' }}>
+        <Button onClick={() => setTool('circle')} style={{ backgroundColor: isActive('circle') ? '#e7ae00' : '#FFE082' }} aria-label="Circle tool" aria-pressed={isActive('circle')}>
           Circle
         </Button>
-        <Button onClick={() => setTool('line')} style={{ backgroundColor: tool === 'line' ? '#e7ae00' : '#FFE082' }}>
+        <Button onClick={() => setTool('line')} style={{ backgroundColor: isActive('line') ? '#e7ae00' : '#FFE082' }} aria-label="Line tool" aria-pressed={isActive('line')}>
           Line
         </Button>
-        <Button onClick={() => setTool('text')} style={{ backgroundColor: tool === 'text' ? '#e7ae00' : '#FFE082' }}>
+        <Button onClick={() => setTool('text')} style={{ backgroundColor: isActive('text') ? '#e7ae00' : '#FFE082' }} aria-label="Text tool" aria-pressed={isActive('text')}>
           Text
         </Button>
-        <Button onClick={undo}>↩ Undo</Button>
-        <Button onClick={redo}>↪ Redo</Button>
-        <Button onClick={clearCanvas}>Clear Canvas</Button>
+        <Button onClick={undo} aria-label="Undo">↩ Undo</Button>
+        <Button onClick={redo} aria-label="Redo">↪ Redo</Button>
+        <ClearButton onClick={handleClearClick} aria-label="Clear canvas">Clear Canvas</ClearButton>
       </ToolBar>
       <CanvasWrapper>
         <StyledCanvas

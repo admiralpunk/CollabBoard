@@ -1,3 +1,7 @@
+// DEPRECATED: This component is no longer used.
+// The toolbar is defined inline in Canvas.jsx.
+// Kept for reference — remove in a future cleanup pass.
+
 import styled from 'styled-components';
 
 const ToolBar = styled.div`
@@ -23,7 +27,7 @@ const Button = styled.button`
   border: none;
   border-radius: 16px;
   cursor: pointer;
-  
+
   &:hover {
     background-color: #e7ae00;
   }
@@ -45,13 +49,13 @@ const DrawingTools = ({ color, size, tool, onColorChange, onSizeChange, onToolCh
         value={size}
         onChange={(e) => onSizeChange(parseInt(e.target.value))}
       />
-      <Button 
+      <Button
         onClick={() => onToolChange('pen')}
         style={{ backgroundColor: tool === 'pen' ? '#e7ae00' : '#FFE082' }}
       >
         Pen
       </Button>
-      <Button 
+      <Button
         onClick={() => onToolChange('eraser')}
         style={{ backgroundColor: tool === 'eraser' ? '#e7ae00' : '#FFE082' }}
       >

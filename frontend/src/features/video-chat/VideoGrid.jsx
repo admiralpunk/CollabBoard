@@ -1,20 +1,21 @@
-import { useEffect, useRef } from 'react';
-import styled from 'styled-components';
+import { useEffect, useRef } from 'react'
+import styled from 'styled-components'
+import EmptyState from '../../shared/components/EmptyState'
 
 const Grid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 10px;
   margin: 20px;
-`;
+`
 
 const VideoContainer = styled.div`
   position: relative;
   aspect-ratio: 16/9;
   background: #1a1a1a;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   overflow: hidden;
-`;
+`
 
 const Video = styled.video`
   width: 100%;
@@ -22,69 +23,68 @@ const Video = styled.video`
   object-fit: cover;
 `
 
+const UsernameBadge = styled.div`
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(0,0,0,0.7);
+  color: white;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+`
+
 const VideoGrid = ({ streams, username, usernameMap }) => {
-  const videoRefs = useRef({});
+  const videoRefs = useRef({})
 
   useEffect(() => {
     Object.entries(streams).forEach(([peerId, stream]) => {
       if (videoRefs.current[peerId] && stream) {
-        const videoElement = videoRefs.current[peerId];
-        
+        const videoElement = videoRefs.current[peerId]
+
         if (videoElement.srcObject !== stream) {
-          videoElement.srcObject = stream;
-          
-          const playPromise = videoElement.play();
+          videoElement.srcObject = stream
+
+          const playPromise = videoElement.play()
           if (playPromise !== undefined) {
             playPromise.catch(e => {
               if (e.name !== 'AbortError') {
               }
-            });
+            })
           }
         }
       }
-    });
-  }, [streams]);
+    })
+  }, [streams])
 
   return (
-    <Grid>
+    <Grid role="region" aria-label="Video chat grid">
       {Object.entries(streams).map(([peerId, stream]) => {
+        const displayName = peerId === 'local'
+          ? 'You'
+          : (usernameMap && usernameMap[peerId] ? usernameMap[peerId] : `Peer ${peerId.slice(0, 6)}`)
         return (
           <VideoContainer key={peerId}>
             <Video
               ref={el => {
-                videoRefs.current[peerId] = el;
+                videoRefs.current[peerId] = el
               }}
               autoPlay
               playsInline
               muted={peerId === 'local'}
+              aria-label={`Video from ${displayName}`}
             />
-            <div style={{
-              position: 'absolute',
-              bottom: '8px',
-              left: '8px',
-              background: 'rgba(0,0,0,0.7)',
-              color: 'white',
-              padding: '2px 6px',
-              borderRadius: '4px',
-              fontSize: '12px'
-            }}>
-              {peerId === 'local' ? 'You' : (usernameMap && usernameMap[peerId] ? usernameMap[peerId] : `Peer ${peerId.slice(0, 6)}`)}
-            </div>
+            <UsernameBadge aria-label={`User: ${displayName}`}>
+              {displayName}
+            </UsernameBadge>
           </VideoContainer>
-        );
+        )
       })}
       {Object.keys(streams).length === 0 && (
-        <div style={{ 
-          gridColumn: '1 / -1', 
-          textAlign: 'center', 
-          padding: '40px',
-          color: '#666'
-        }}>
-          No video streams available
-        </div>
+        <EmptyState icon="📹" message="No video streams available" />
       )}
     </Grid>
-  );
-};
+  )
+}
 
-export default VideoGrid;
+export default VideoGrid
