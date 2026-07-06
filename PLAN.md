@@ -17,7 +17,7 @@
 
 ## Phase 2: Feature Improvements
 
-### Canvas
+### Canvas, 
 - [x] **Undo/redo** — Stroke history stack on client, undo/redo socket events for real-time sync
 - [x] **Shape tools** — Rectangles, circles, lines, text tool with preview rendering
 - [x] **Touch/pointer events** — `onPointerDown/Move/Up` to unify mouse + touch
@@ -95,10 +95,10 @@
 
 ## Phase 4: Architectural Improvements
 
-- [ ] **Graceful backend shutdown** — Handle `SIGTERM`/`SIGINT` in `server.js`
-- [ ] **Global error boundary** — React error boundary wrapping the app
-- [ ] **Socket middleware** — Per-socket event rate limiting (max 60 draw/sec)
-- [ ] **`React.memo`** — Wrap `MessageList`, `VideoGrid`, `MessageInput`
-- [ ] **Backend Logger audit** — Replace `console.log` with `logger` module everywhere
-- [ ] **RoomService refactor** — Combine dual-tracking (Socket.IO rooms + RoomService Maps) into single source of truth
+- [x] **Graceful backend shutdown** — Handle `SIGTERM`/`SIGINT` in `server.js`
+- [x] **Global error boundary** — React error boundary wrapping the app
+- [x] **Socket middleware** — Per-socket event rate limiting (max 60 draw/sec)
+- [x] **`React.memo`** — Wrap `MessageList`, `VideoGrid`, `MessageInput`
+- [x] **Backend Logger audit** — Replace `console.log` with `logger` module everywhere
+- [x] **RoomService refactor** — Combine dual-tracking (Socket.IO rooms + RoomService Maps) into single source of truth
 - [x] **`wrtc` / `@roamhq/wrtc` cleanup** — Removed unused dependencies

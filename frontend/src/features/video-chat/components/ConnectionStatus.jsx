@@ -9,25 +9,10 @@ const StatusContainer = styled.div`
   border-radius: var(--radius-sm);
 `
 
-const PeerStatus = styled.div`
-  margin: 2px 0;
-  font-size: 11px;
-`
-
-const ConnectionStatus = ({ peerCount, streamCount, connectionStatus = {} }) => {
+const ConnectionStatus = ({ peerCount, streamCount }) => {
   return (
     <StatusContainer role="status" aria-label="Connection status">
-      <div><strong>Connected peers:</strong> {peerCount} | <strong>Streams:</strong> {streamCount}</div>
-      {Object.keys(connectionStatus).length > 0 && (
-        <div style={{ marginTop: '5px' }}>
-          <strong>Peer Status:</strong>
-          {Object.entries(connectionStatus).map(([peerId, status]) => (
-            <PeerStatus key={peerId}>
-              {peerId.slice(0, 6)}: {status}
-            </PeerStatus>
-          ))}
-        </div>
-      )}
+      <strong>Connected peers:</strong> {peerCount} | <strong>Streams:</strong> {streamCount}
     </StatusContainer>
   )
 }

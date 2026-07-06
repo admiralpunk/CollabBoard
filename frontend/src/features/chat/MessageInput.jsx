@@ -1,4 +1,4 @@
-import { useState, useRef } from "react"
+import { useState, useRef, memo } from "react"
 import styled from "styled-components"
 
 const InputContainer = styled.form`
@@ -126,4 +126,4 @@ const MessageInput = ({ onSendMessage, onTyping }) => {
   )
 }
 
-export default MessageInput
+export default memo(MessageInput)

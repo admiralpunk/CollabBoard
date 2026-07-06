@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, memo } from "react"
 import styled from "styled-components"
 import EmptyState from "../../shared/components/EmptyState"
 
@@ -114,4 +114,4 @@ const MessageList = ({ messages, username, typingUsers }) => {
   )
 }
 
-export default MessageList
+export default memo(MessageList)

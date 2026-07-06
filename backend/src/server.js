@@ -4,19 +4,17 @@ import socketio from 'socket.io';
 import { config } from './config/index.js';
 import { corsMiddleware } from './middleware/cors.js';
 import { setupSocketEvents } from './socket/events.js';
+import { createSocketRateLimiter } from './middleware/socketRateLimiter.js';
 import logger from './utils/logger.js';
 import rateLimit from 'express-rate-limit';
 import roomService from './services/RoomService.js'
 
 const app = express();
 
-// ADD THIS LINE
 app.set('trust proxy', 1);
 
-// Middleware
 app.use(corsMiddleware);
 
-// Rate limiting middleware: 100 requests per 15 minutes per IP
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -26,21 +24,18 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-// Create HTTP server
 const httpServer = createServer(app);
 
-// Create Socket.IO server
 const io = socketio(httpServer, {
   transports: config.socketTransports,
 });
 
-// For socket.io v2.x, set CORS headers manually if needed
 io.origins('*:*');
 
-// Setup socket events
+io.use(createSocketRateLimiter())
+
 setupSocketEvents(io);
 
-// Basic health check route
 app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
@@ -49,9 +44,8 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Room listing endpoint
 app.get('/api/rooms', (req, res) => {
-  const rooms = roomService.getAllRooms()
+  const rooms = roomService.getAllRooms(io)
   const enriched = {}
   for (const [roomId, info] of Object.entries(rooms)) {
     enriched[roomId] = {
@@ -64,7 +58,6 @@ app.get('/api/rooms', (req, res) => {
   res.json(enriched)
 })
 
-// Start server
 const PORT = process.env.PORT || config.port || 3000;
 
 httpServer.listen(PORT, '0.0.0.0', () => {
@@ -73,5 +66,27 @@ httpServer.listen(PORT, '0.0.0.0', () => {
   logger.info(`CORS Origin: ${config.corsOrigin}`);
   logger.info(`Socket Transports: ${config.socketTransports.join(', ')}`);
 });
+
+const shutdown = async (signal) => {
+  logger.info(`${signal} received. Shutting down gracefully...`);
+
+  httpServer.close(() => {
+    logger.info('HTTP server closed');
+  })
+
+  io.close(() => {
+    logger.info('Socket.IO server closed');
+  })
+
+  setTimeout(() => {
+    logger.error('Forced shutdown after timeout');
+    process.exit(1);
+  }, 10000).unref()
+
+  process.exit(0)
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'))
+process.on('SIGINT', () => shutdown('SIGINT'))
 
 export default app;

@@ -108,7 +108,7 @@ export const useCanvas = (canvasRef, socket, roomId) => {
 
   useEffect(() => {
     const canvas = canvasRef.current
-    const ctx = canvas.getContext("2d")
+    const ctx = canvas.getContext("2d", { willReadFrequently: true })
 
     canvas.width = 800
     canvas.height = 600

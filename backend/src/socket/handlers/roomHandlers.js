@@ -1,4 +1,5 @@
 import roomService from '../../services/RoomService.js'
+import logger from '../../utils/logger.js'
 
 export const handleJoinRoom = (socket, io) => ({ roomId, userId, username }) => {
   if (!roomId || typeof roomId !== 'string' || roomId.length > 30) return
@@ -7,16 +8,12 @@ export const handleJoinRoom = (socket, io) => ({ roomId, userId, username }) => 
   if (username.length < 2 || username.length > 20) return
   if (!/^[a-zA-Z0-9_\u0080-\uFFFF]+$/.test(username)) return
 
-  // Check if user already has an active connection
   if (roomService.hasActiveConnection(userId, io)) {
-    const existingSocketId = roomService.getUserConnection(userId)
     socket.emit("username-taken", {
       message: `You already have an active connection. Please wait a moment before trying again.`
     })
     return
   }
-
-  roomService.debugState(io)
 
   if (roomService.isUsernameTakenByUser(io, roomId, username, userId)) {
     socket.emit("username-taken", {
@@ -27,40 +24,35 @@ export const handleJoinRoom = (socket, io) => ({ roomId, userId, username }) => 
 
   roomService.removeUsername(socket.id)
 
+  const roomExisted = !!io.sockets.adapter.rooms?.[roomId]
   socket.join(roomId)
 
-  const roomCreated = roomService.createRoom(roomId)
-  const result = roomService.addUserToRoom(roomId, userId)
+  const userCount = roomService.getUserCountInRoom(io, roomId)
 
   socket._userId = userId
   socket._roomId = roomId
   roomService.setUsername(socket.id, username)
-
   roomService.setUserConnection(userId, socket.id)
 
-  const users = roomService.getUsersInRoom(roomId)
+  const users = roomService.getUsersInRoom(io, roomId)
   const usernameMap = roomService.buildUsernameMap(io, roomId)
 
   socket.emit("all-users", { users, usernameMap })
 
-  if (roomCreated) {
+  if (!roomExisted) {
     socket.emit("room-created", { roomId })
   }
 
-  // Send current canvas state to the joining user
   const canvasHistory = roomService.getCanvasHistory(roomId)
   if (canvasHistory.length > 0) {
     socket.emit("canvas-state", canvasHistory)
   }
 
   io.to(roomId).emit("usernames-update", { usernameMap })
-
-  if (result && result.isNewUser) {
-    io.to(roomId).emit("user-joined", {
-      userId,
-      userCount: result.userCount,
-    })
-  }
+  io.to(roomId).emit("user-joined", {
+    userId,
+    userCount,
+  })
 }
 
 export const handleJoin = (socket, io) => (room) => {
@@ -79,7 +71,6 @@ export const handleJoin = (socket, io) => (room) => {
   ).filter(id => id !== socket.id)
 
   socket.emit("peers-in-room", clients)
-
   socket.to(room).emit("peer-joined", socket.id)
 }
 
@@ -89,13 +80,11 @@ export const handleDisconnecting = (socket, io) => () => {
       socket.to(room).emit("peer-left", socket.id)
 
       if (socket._userId) {
-        const result = roomService.removeUserFromRoom(room, socket._userId)
-        if (result) {
-          io.to(room).emit("user-left", {
-            userId: socket._userId,
-            userCount: result.userCount
-          })
-        }
+        const count = roomService.getUserCountInRoom(io, room)
+        io.to(room).emit("user-left", {
+          userId: socket._userId,
+          userCount: Math.max(0, count - 1)
+        })
       }
     }
   })
@@ -107,16 +96,14 @@ export const handleDisconnecting = (socket, io) => () => {
 }
 
 export const handleDisconnect = (socket, io) => () => {
-  // Fallback cleanup only — primary cleanup happens in handleDisconnecting
-  // This catches edge cases where disconnecting didn't fire
   if (socket._userId) {
-    const rooms = roomService.getUsersInRoom(socket._roomId)
-    if (rooms.length > 0 && socket._roomId) {
-      const result = roomService.removeUserFromRoom(socket._roomId, socket._userId)
-      if (result) {
-        io.to(socket._roomId).emit("user-left", {
+    const roomId = socket._roomId
+    if (roomId) {
+      const count = roomService.getUserCountInRoom(io, roomId)
+      if (count > 0) {
+        io.to(roomId).emit("user-left", {
           userId: socket._userId,
-          userCount: result.userCount
+          userCount: Math.max(0, count - 1)
         })
       }
     }
