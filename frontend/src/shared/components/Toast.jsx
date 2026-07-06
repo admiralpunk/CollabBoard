@@ -1,4 +1,5 @@
 import styled, { keyframes } from "styled-components"
+import Icon from "./Icon"
 
 const slideIn = keyframes`
   from { transform: translateX(100%); opacity: 0; }
@@ -25,15 +26,15 @@ const ToastItem = styled.div`
   border-radius: var(--radius-md);
   background: ${props =>
     props.$variant === "error" ? "var(--color-error-bg)" :
-    props.$variant === "success" ? "#e8f5e9" :
+    props.$variant === "success" ? "var(--color-success-bg)" :
     props.$variant === "warning" ? "var(--color-warning-bg)" :
-    "#fff"
+    "var(--color-surface)"
   };
   color: ${props =>
     props.$variant === "error" ? "var(--color-error)" :
     props.$variant === "success" ? "var(--color-success)" :
     props.$variant === "warning" ? "var(--color-warning)" :
-    "var(--color-text)"
+    "var(--color-text-primary)"
   };
   box-shadow: var(--shadow-lg);
   animation: ${slideIn} 0.3s ease;
@@ -49,11 +50,11 @@ const DismissButton = styled.button`
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 18px;
-  line-height: 1;
+  line-height: 0;
   opacity: 0.6;
-  padding: 0 4px;
+  padding: 4px;
   color: inherit;
+  border-radius: var(--radius-sm);
 
   &:hover { opacity: 1; }
 `
@@ -62,7 +63,7 @@ const Toast = ({ toasts, onDismiss }) => {
   if (!toasts || toasts.length === 0) return null
 
   return (
-    <ToastContainer role="alert" aria-live="polite">
+    <ToastContainer role="alert" aria-live="polite" aria-atomic="true">
       {toasts.map(toast => (
         <ToastItem
           key={toast.id}
@@ -74,7 +75,7 @@ const Toast = ({ toasts, onDismiss }) => {
             onClick={() => onDismiss(toast.id)}
             aria-label="Dismiss notification"
           >
-            ×
+            <Icon name="x" size={16} />
           </DismissButton>
         </ToastItem>
       ))}

@@ -8,7 +8,7 @@ const Overlay = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 1001;
 `
 
 const Dialog = styled.div`
@@ -53,7 +53,7 @@ const ConfirmButton = styled.button`
 const CancelButton = styled.button`
   padding: 10px 24px;
   background: var(--color-primary);
-  color: #333;
+  color: var(--color-text-on-primary);
   border: none;
   border-radius: var(--radius-sm);
   cursor: pointer;

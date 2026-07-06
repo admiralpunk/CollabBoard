@@ -1,4 +1,5 @@
 import styled from "styled-components"
+import Icon from "./Icon"
 
 const Wrapper = styled.div`
   display: flex;
@@ -11,14 +12,14 @@ const Wrapper = styled.div`
   gap: 8px;
 `
 
-const Icon = styled.div`
-  font-size: 2em;
+const IconWrap = styled.div`
   opacity: 0.5;
+  line-height: 0;
 `
 
 const EmptyState = ({ icon, message, compact }) => (
   <Wrapper $compact={compact}>
-    {icon && <Icon>{icon}</Icon>}
+    {icon && <IconWrap><Icon name={icon} size={32} /></IconWrap>}
     <span>{message}</span>
   </Wrapper>
 )

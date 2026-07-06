@@ -6,9 +6,9 @@ const shimmer = keyframes`
 `
 
 const SkeletonBlock = styled.div`
-  background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+  background: linear-gradient(90deg, var(--color-gray-300) 25%, var(--color-gray-100) 50%, var(--color-gray-300) 75%);
   background-size: 200px 100%;
-  animation: ${shimmer} 1.5s ease-in-out infinite;
+  animation: ${shimmer} 1.8s ease-in-out infinite;
   border-radius: ${props => props.$radius || "var(--radius-sm)"};
   width: ${props => props.$width || "100%"};
   height: ${props => props.$height || "16px"};

@@ -10,6 +10,7 @@ import LoadingSpinner from "../shared/components/LoadingSpinner"
 import Toast from "../shared/components/Toast"
 import ConfirmationDialog from "../shared/components/ConfirmationDialog"
 import Skeleton from "../shared/components/Skeleton"
+import Icon from "../shared/components/Icon"
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -19,6 +20,10 @@ const AppContainer = styled.div`
 const RoomInfo = styled.div`
   text-align: center;
   margin-bottom: 20px;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  box-shadow: var(--shadow-sm);
 `
 
 const ContentContainer = styled.div`
@@ -40,23 +45,36 @@ const RightPanel = styled.div`
   flex-direction: column;
   gap: 20px;
 
+  @media (max-width: 1024px) {
+    width: 300px;
+  }
+
   @media (max-width: 768px) {
     width: 100%;
+  }
+
+  @media (max-width: 480px) {
+    gap: var(--space-sm);
   }
 `
 
 const BackButton = styled.button`
   background: var(--color-primary);
-  color: #333;
+  color: var(--color-text-on-primary);
   border: none;
   border-radius: var(--radius-md);
   padding: 10px 20px;
   cursor: pointer;
   margin-bottom: 20px;
-  font-weight: bold;
-  transition: background 0.2s;
+  font-weight: var(--weight-bold);
+  transition: background 0.2s, transform 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 
-  &:hover { background: var(--color-primary-hover); }
+  &:hover { background: var(--color-primary-hover); transform: translateY(-1px); }
+
+  &:active { transform: scale(0.97); }
 
   &:focus-visible {
     outline: 2px solid var(--color-primary-hover);
@@ -84,8 +102,9 @@ const RetryButton = styled.button`
   border: none;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  font-weight: bold;
-  color: #333;
+  font-weight: var(--weight-bold);
+  color: var(--color-text-on-primary);
+  transition: background 0.2s;
 
   &:hover { background: var(--color-primary-hover); }
 `
@@ -97,6 +116,7 @@ const JoinContainer = styled.div`
 
 const JoinTitle = styled.h2`
   margin-bottom: var(--space-lg);
+  font-size: var(--heading-xl);
 `
 
 const JoinRow = styled.div`
@@ -108,22 +128,32 @@ const JoinRow = styled.div`
 `
 
 const UsernameInput = styled.input`
-  padding: 10px;
-  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
+  font-size: var(--body-md);
+  transition: box-shadow 0.2s, border-color 0.2s;
+
+  &:focus-visible {
+    outline: none;
+    border-color: var(--color-border-focus);
+    box-shadow: 0 0 0 3px rgba(231, 174, 0, 0.15);
+  }
 `
 
 const JoinButton = styled.button`
-  padding: 10px 20px;
+  padding: 12px 24px;
   background: var(--color-primary);
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  font-weight: bold;
-  color: #333;
-  transition: background 0.2s;
+  font-weight: var(--weight-bold);
+  color: var(--color-text-on-primary);
+  transition: background 0.2s, transform 0.15s;
 
-  &:hover { background: var(--color-primary-hover); }
+  &:hover { background: var(--color-primary-hover); transform: translateY(-1px); }
+
+  &:active { transform: scale(0.97); }
 
   &:focus-visible {
     outline: 2px solid var(--color-primary-hover);
@@ -164,11 +194,15 @@ const PopupDialog = styled.div`
 const PopupTitle = styled.h3`
   margin: 0 0 15px 0;
   color: var(--color-warning);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 `
 
 const PopupMessage = styled.p`
   margin: 0 0 20px 0;
-  color: #333;
+  color: var(--color-text-primary);
 `
 
 const PopupButton = styled.button`
@@ -177,7 +211,8 @@ const PopupButton = styled.button`
   padding: 10px 20px;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  font-weight: bold;
+  font-weight: var(--weight-bold);
+  color: var(--color-text-on-primary);
 
   &:hover { background: var(--color-primary-hover); }
 `
@@ -185,10 +220,21 @@ const PopupButton = styled.button`
 const VideoChatPlaceholder = styled.div`
   text-align: center;
   padding: 20px;
-  background: #f8f9fa;
+  background: var(--color-surface-alt);
   border-radius: var(--radius-md);
   margin-bottom: 20px;
   color: var(--color-text-secondary);
+`
+
+const DisconnectBanner = styled.div`
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  background: var(--color-danger);
+  color: white;
+  text-align: center;
+  padding: 8px;
+  z-index: 999;
+  font-weight: var(--weight-bold);
 `
 
 const UserInfo = styled.div`
@@ -409,7 +455,7 @@ const RoomPage = () => {
   if (!username) {
     return (
       <AppContainer>
-        <BackButton onClick={handleBackToHome}>← Back to Home</BackButton>
+        <BackButton onClick={handleBackToHome}><Icon name="arrow-left" size={16} /> Back to Home</BackButton>
         <JoinContainer>
           <JoinTitle>Join Room: {roomId}</JoinTitle>
           <JoinRow>
@@ -459,7 +505,7 @@ const RoomPage = () => {
           onClick={() => {}}
         >
           <PopupDialog>
-            <PopupTitle>⚠️ Username Already Exists</PopupTitle>
+            <PopupTitle><Icon name="alert-triangle" size={18} /> Username Already Exists</PopupTitle>
             <PopupMessage>
               The username you entered is already taken in this room. Please try a different username.
             </PopupMessage>
@@ -484,23 +530,14 @@ const RoomPage = () => {
       <Toast toasts={toasts} onDismiss={dismissToast} />
 
       {connectionStatus === "disconnected" && (
-        <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0,
-          background: 'var(--color-danger)',
-          color: 'white',
-          textAlign: 'center',
-          padding: '8px',
-          zIndex: 999,
-          fontWeight: 'bold'
-        }} role="alert">
+        <DisconnectBanner role="alert">
           Connection Lost — Reconnecting...
-        </div>
+        </DisconnectBanner>
       )}
 
       {username && socket && connectionStatus !== "error" && (
         <AppContainer>
-          <BackButton onClick={requestLeave} aria-label="Back to home">← Back to Home</BackButton>
+          <BackButton onClick={requestLeave} aria-label="Back to home"><Icon name="arrow-left" size={16} /> Back to Home</BackButton>
 
           {notification && (
             <NotificationBanner role="alert">{notification}</NotificationBanner>

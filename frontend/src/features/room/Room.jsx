@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { BACKEND_URL } from '../../constants/config.js'
 import LoadingSpinner from '../../shared/components/LoadingSpinner'
+import Skeleton from '../../shared/components/Skeleton'
 
 const RoomContainer = styled.div`
   max-width: 600px;
@@ -12,41 +13,44 @@ const RoomContainer = styled.div`
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  height: 100vh;
-  padding-top: 10vh;
+  min-height: 100vh;
+  padding-top: 15vh;
 `
 
 const Input = styled.input`
   width: 100%;
-  padding: 10px;
+  padding: 12px 14px;
   margin: 10px 0;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
+  transition: box-shadow 0.2s, border-color 0.2s;
 
   &:focus-visible {
-    outline: 2px solid var(--color-primary-hover);
-    outline-offset: 1px;
+    outline: none;
+    border-color: var(--color-border-focus);
+    box-shadow: 0 0 0 3px rgba(231, 174, 0, 0.15);
   }
 `
 
 const Button = styled.button`
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   background-color: var(--color-primary);
-  color: #333;
+  color: var(--color-text-on-primary);
   border: none;
   border-radius: var(--radius-lg);
   cursor: pointer;
   margin-top: 10px;
-  font-weight: 600;
-  transition: background 0.2s;
+  font-weight: var(--weight-semibold);
+  transition: background 0.2s, transform 0.15s;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
 
-  &:hover { background-color: var(--color-primary-hover); }
-  &:disabled { opacity: 0.6; cursor: not-allowed; }
+  &:hover { background-color: var(--color-primary-hover); transform: translateY(-1px); }
+  &:active { transform: scale(0.97); }
+  &:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
   &:focus-visible {
     outline: 2px solid var(--color-primary-hover);
@@ -57,7 +61,7 @@ const Button = styled.button`
 const ErrorText = styled.div`
   color: var(--color-error);
   margin-top: 10px;
-  font-size: var(--font-sm);
+  font-size: var(--body-sm);
 `
 
 const RoomListSection = styled.div`
@@ -69,6 +73,7 @@ const RoomListSection = styled.div`
 const RoomListTitle = styled.h3`
   margin: 0 0 10px 0;
   color: var(--color-text-secondary);
+  font-size: var(--heading-md);
 `
 
 const RoomEntry = styled.div`
@@ -76,33 +81,45 @@ const RoomEntry = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 10px 14px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--color-border-light);
   border-radius: var(--radius-md);
   margin-bottom: 8px;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
 
   &:hover {
-    background: #fff8e1;
+    background: var(--color-primary-light);
     border-color: var(--color-primary);
+    box-shadow: var(--shadow-sm);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary-hover);
+    outline-offset: 2px;
   }
 `
 
 const RoomName = styled.span`
-  font-weight: 600;
-  color: #333;
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
 `
 
 const RoomUsers = styled.span`
-  font-size: var(--font-sm);
-  color: #777;
+  font-size: var(--body-sm);
+  color: var(--color-text-secondary);
 `
 
 const EmptyRooms = styled.div`
   color: var(--color-text-muted);
-  font-size: var(--font-sm);
+  font-size: var(--body-sm);
   padding: 20px 0;
   text-align: center;
+`
+
+const SkeletonList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 `
 
 const NotificationBanner = styled.div`
@@ -219,7 +236,12 @@ const Room = ({ onJoinRoom, notification }) => {
       <RoomListSection>
         <RoomListTitle>Active Rooms</RoomListTitle>
         {roomsLoading ? (
-          <EmptyRooms>Loading...</EmptyRooms>
+          <SkeletonList>
+            <Skeleton $height={48} $radius="8px" />
+            <Skeleton $height={48} $radius="8px" />
+            <Skeleton $height={48} $radius="8px" />
+            <Skeleton $height={48} $radius="8px" />
+          </SkeletonList>
         ) : roomEntries.length === 0 ? (
           <EmptyRooms>No active rooms. Create one above!</EmptyRooms>
         ) : (

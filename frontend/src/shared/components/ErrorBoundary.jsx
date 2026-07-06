@@ -15,6 +15,7 @@ const ErrorContainer = styled.div`
 const ErrorTitle = styled.h1`
   color: var(--color-error);
   margin-bottom: 16px;
+  font-size: var(--heading-xl);
 `
 
 const ErrorMessage = styled.p`
@@ -29,9 +30,9 @@ const ReloadButton = styled.button`
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
-  font-weight: bold;
-  font-size: 16px;
-  color: #333;
+  font-weight: var(--weight-bold);
+  font-size: var(--body-lg);
+  color: var(--color-text-on-primary);
 
   &:hover { background: var(--color-primary-hover); }
 `

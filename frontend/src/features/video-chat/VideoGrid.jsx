@@ -12,9 +12,10 @@ const Grid = styled.div`
 const VideoContainer = styled.div`
   position: relative;
   aspect-ratio: 16/9;
-  background: #1a1a1a;
+  background: var(--color-bg-dark);
   border-radius: var(--radius-md);
   overflow: hidden;
+  border: 1px solid var(--color-border);
 `
 
 const Video = styled.video`
@@ -31,7 +32,7 @@ const UsernameBadge = styled.div`
   color: white;
   padding: 2px 6px;
   border-radius: var(--radius-sm);
-  font-size: 12px;
+  font-size: var(--body-sm);
 `
 
 const VideoGrid = ({ streams, username, usernameMap }) => {
@@ -81,7 +82,7 @@ const VideoGrid = ({ streams, username, usernameMap }) => {
         )
       })}
       {Object.keys(streams).length === 0 && (
-        <EmptyState icon="📹" message="No video streams available" />
+        <EmptyState icon="video" message="No video streams available. Your video will appear here once someone joins" />
       )}
     </Grid>
   )

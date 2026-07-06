@@ -1,5 +1,6 @@
 import { useState, useRef, memo } from "react"
 import styled from "styled-components"
+import Icon from "../../shared/components/Icon"
 
 const InputContainer = styled.form`
   display: flex;
@@ -13,10 +14,10 @@ const TextArea = styled.textarea`
   flex-grow: 1;
   padding: 12px 16px;
   border: 2px solid rgba(255, 224, 130, 0.4);
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   background: rgba(255, 255, 255, 0.8);
-  color: #2c3e50;
-  font-size: 14px;
+  color: var(--color-text-dark);
+  font-size: var(--body-md);
   font-family: inherit;
   transition: all 0.2s ease;
   resize: none;
@@ -25,48 +26,52 @@ const TextArea = styled.textarea`
 
   &:focus {
     outline: none;
-    border-color: #e7ae00;
+    border-color: var(--color-border-focus);
     background: rgba(255, 255, 255, 0.95);
     box-shadow: 0 0 0 3px rgba(231, 174, 0, 0.1);
   }
 
   &::placeholder {
-    color: rgba(44, 62, 80, 0.6);
+    color: var(--color-text-dark);
+    opacity: 0.6;
   }
 `
 
 const CharCount = styled.span`
-  font-size: 0.75em;
-  color: ${props => props.$over ? '#d32f2f' : '#999'};
+  font-size: var(--body-sm);
+  color: ${props => props.$over ? 'var(--color-error)' : 'var(--color-text-muted)'};
   align-self: flex-end;
   margin-bottom: 4px;
 `
 
 const SendButton = styled.button`
   padding: 12px 20px;
-  background: linear-gradient(135deg, #928e85 0%, #7a7670 100%);
+  background: linear-gradient(135deg, var(--color-gray-600) 0%, var(--color-gray-700) 100%);
   color: white;
   border: 1px solid rgba(146, 142, 133, 0.3);
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: var(--weight-semibold);
+  font-size: var(--body-md);
   transition: all 0.2s ease;
-  min-width: 80px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 
   &:hover {
-    background: linear-gradient(135deg, #7a7670 0%, #6b6760 100%);
+    background: linear-gradient(135deg, var(--color-gray-700) 0%, var(--color-gray-800) 100%);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(146, 142, 133, 0.3);
   }
 
   &:active {
-    transform: translateY(0);
+    transform: scale(0.97);
   }
 
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    transform: none;
   }
 `
 
@@ -120,6 +125,7 @@ const MessageInput = ({ onSendMessage, onTyping }) => {
         </CharCount>
       </div>
       <SendButton type="submit" disabled={!message.trim()} aria-label="Send message">
+        <Icon name="send" size={16} />
         Send
       </SendButton>
     </InputContainer>

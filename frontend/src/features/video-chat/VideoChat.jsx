@@ -18,7 +18,7 @@ const VideoChat = forwardRef(({ socket, roomId, userId, username, usernameMap = 
   } = useMediaStream()
 
   const myId = useSocketId(socket)
-  const { streams, peerCount, connectionStatus } = usePeerConnection(socket, roomId, stream, myId)
+  const { streams, peerCount } = usePeerConnection(socket, roomId, stream, myId)
 
   useImperativeHandle(ref, () => ({
     stopStream
@@ -37,7 +37,6 @@ const VideoChat = forwardRef(({ socket, roomId, userId, username, usernameMap = 
           <ConnectionStatus
             peerCount={peerCount}
             streamCount={Object.keys(streams).length}
-            connectionStatus={connectionStatus}
           />
           <VideoGrid streams={streams} username={username} usernameMap={usernameMap} />
           <Controls

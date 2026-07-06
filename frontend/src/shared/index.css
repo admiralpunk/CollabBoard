@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -8,23 +10,68 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --color-primary: #FFE082;
+  --color-primary-50: #FFF8E1;
+  --color-primary-100: #FFECB3;
+  --color-primary-200: #FFE082;
+  --color-primary-300: #FFD54F;
+  --color-primary-400: #FFCA28;
+  --color-primary-500: #FFC107;
+  --color-primary-600: #FFB300;
+  --color-primary-700: #FFA000;
+  --color-primary-800: #FF8F00;
+  --color-primary-900: #FF6F00;
+
+  --color-primary: var(--color-primary-200);
   --color-primary-hover: #e7ae00;
-  --color-primary-light: #FFF8E1;
+  --color-primary-light: var(--color-primary-50);
+
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f5f5f5;
+  --color-gray-200: #eeeeee;
+  --color-gray-300: #e0e0e0;
+  --color-gray-400: #bdbdbd;
+  --color-gray-500: #9e9e9e;
+  --color-gray-600: #777;
+  --color-gray-700: #666;
+  --color-gray-800: #444;
+  --color-gray-900: #333;
+
+  --color-slate-50: #f8f9fa;
+  --color-slate-100: #e9ecef;
+  --color-slate-200: #dee2e6;
+  --color-slate-300: #ced4da;
+  --color-slate-400: #adb5bd;
+  --color-slate-500: #708090;
+  --color-slate-600: #5f6f7f;
+  --color-slate-700: #2c3e50;
+  --color-slate-800: #1a1a2e;
+  --color-slate-900: #1a1a1a;
+
   --color-danger: #e74c3c;
   --color-danger-hover: #c0392b;
   --color-error: #d32f2f;
   --color-error-bg: #ffebee;
   --color-success: #2e7d32;
+  --color-success-bg: #e8f5e9;
+  --color-info: #1976d2;
+  --color-info-bg: #e3f2fd;
   --color-warning: #856404;
   --color-warning-bg: #ffeeba;
-  --color-text: #000000;
+
+  --color-text-primary: #333;
   --color-text-secondary: #666;
   --color-text-muted: #999;
+  --color-text-on-primary: #333;
+  --color-text-inverse: #fff;
+  --color-text-dark: #2c3e50;
   --color-bg: #f5f5dc;
+  --color-bg-dark: #1a1a1a;
   --color-surface: #ffffff;
   --color-surface-alt: #f5f5f5;
+  --color-surface-hover: #f0f0f0;
   --color-border: #ddd;
+  --color-border-light: #e0e0e0;
+  --color-border-focus: #e7ae00;
   --color-overlay: rgba(0, 0, 0, 0.5);
   --color-online: #4caf50;
 
@@ -43,10 +90,27 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
 
-  --font-sm: 0.85em;
-  --font-md: 1em;
-  --font-lg: 1.2em;
-  --font-xl: 1.5em;
+  --heading-xxl: 2rem;
+  --heading-xl: 1.5rem;
+  --heading-lg: 1.25rem;
+  --heading-md: 1.1rem;
+
+  --body-sm: 0.75rem;
+  --body-md: 0.875rem;
+  --body-lg: 1rem;
+
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.7;
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --icon-sm: 14px;
+  --icon-md: 18px;
+  --icon-lg: 24px;
 }
 
 * {
@@ -59,8 +123,36 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  color: var(--color-text);
+  color: var(--color-text-primary);
   background-color: var(--color-bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary: var(--color-primary-300);
+    --color-primary-light: #3a3a2a;
+    --color-primary-hover: #FFD54F;
+
+    --color-text-primary: #f0f0e0;
+    --color-text-secondary: #b0b0a0;
+    --color-text-muted: #808070;
+    --color-text-on-primary: #333;
+    --color-text-inverse: #fff;
+    --color-text-dark: #d0d0c0;
+    --color-bg: #2d2d1e;
+    --color-bg-dark: #1a1a10;
+    --color-surface: #3a3a2a;
+    --color-surface-alt: #454535;
+    --color-surface-hover: #505040;
+    --color-border: #555545;
+    --color-border-light: #4a4a3a;
+    --color-border-focus: #FFD54F;
+    --color-overlay: rgba(0, 0, 0, 0.7);
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -68,19 +160,5 @@ body {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-  }
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #000000;
-    background-color: #f5f5dc;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #000000;
-    background-color: #f5f5dc;
   }
 }

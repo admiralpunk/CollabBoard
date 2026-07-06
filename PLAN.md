@@ -102,3 +102,152 @@
 - [x] **Backend Logger audit** — Replace `console.log` with `logger` module everywhere
 - [x] **RoomService refactor** — Combine dual-tracking (Socket.IO rooms + RoomService Maps) into single source of truth
 - [x] **`wrtc` / `@roamhq/wrtc` cleanup** — Removed unused dependencies
+
+---
+
+## Phase 5: UI/UX Overhaul
+
+### A. Color Palette & Contrast Overhaul
+
+**Rationale:** 26+ hardcoded hex colors duplicate CSS variables. Some lack sufficient contrast (e.g., `#FFE082` on `#fff`). No dark mode despite `prefers-color-scheme` being set.
+
+- [ ] **Define proper color scale** — Add `--color-primary-50` through `--color-primary-900` (amber) and gray/slate/danger/success scales to `index.css`
+- [ ] **Add semantic aliases** — `--color-text-primary`, `--color-text-on-primary`, `--color-bg-input`, `--color-bg-hover`, `--color-border-focus`
+- [ ] **Replace all hardcoded `#333`** (8+ occurrences: button text, room names, etc.) with `--color-text-primary`
+- [ ] **Replace all hardcoded `#2c3e50`** (chat header, message text, minimize button, input text) with dark-slate variable or `--color-text-primary`
+- [ ] **Replace all hardcoded `#1a1a1a`** (video container bg) with `--color-bg-dark`
+- [ ] **Replace `#f8f9fa`** (video placeholder) with `--color-surface-alt`
+- [ ] **Replace `#e0e0e0`** (RoomEntry border) with `--color-border`
+- [ ] **Add WCAG AA contrast pass** — Ensure all text/background combos meet 4.5:1 ratio for normal text and 3:1 for large text
+- [ ] **Implement proper dark mode** — Actual `prefers-color-scheme: dark` overrides with dark beige/charcoal palette
+- [ ] **Add `--color-success-bg`, `--color-info`, `--color-info-bg`** for completeness
+
+### B. Typography System
+
+**Rationale:** Only `Inter` specified via `font-family` stack. No font weights, heading hierarchy, or line-height scale. Font sizes mix `px`, `em`, and CSS variables.
+
+- [ ] **Load Inter font** via Google Fonts `@import` in `index.css` with weights 400, 500, 600, 700
+- [ ] **Define heading scale** — `--heading-xxl: 2rem`, `--heading-xl: 1.5rem`, `--heading-lg: 1.25rem`, `--heading-md: 1.1rem`
+- [ ] **Define body scale** — `--body-sm: 0.75rem`, `--body-md: 0.875rem`, `--body-lg: 1rem`
+- [ ] **Define line-height scale** — `--leading-tight: 1.2`, `--leading-normal: 1.5`, `--leading-relaxed: 1.7`
+- [ ] **Define font-weight scale** — `--weight-normal: 400`, `--weight-medium: 500`, `--weight-semibold: 600`, `--weight-bold: 700`
+- [ ] **Replace all hardcoded `font-size` values** with typography variables (18px→`--body-lg`, 16px→`--body-lg`, 14px→`--body-md`, 12px→`--body-sm`, `0.7em`→`--body-sm`, `0.85em`→`--body-sm`, `0.9em`→`--body-sm`)
+- [ ] **Replace all hardcoded `font-weight` values** with weight variables
+
+### C. Spacing & Layout Refinement
+
+**Rationale:** Spacing CSS variables used inconsistently. Many elements use raw `px` values. Layout hierarchy is flat.
+
+- [ ] **Audit and replace raw `px` margins/paddings** across all components with spacing variables
+- [ ] **Standardize gaps** — Use `--space-sm` `--space-md` `--space-lg` consistently across all flex/grid gaps
+- [ ] **Refine Room.jsx layout** — Reduce `padding-top: 10vh` to balanced `padding-top: 15vh` or `min-height: 80vh` with centering
+- [ ] **Add consistent section spacing** — Standardize gap between canvas toolbar and canvas element
+- [ ] **Refine RoomPage two-panel layout** — Add min/max width constraints for ultra-wide screens
+- [ ] **Improve Chat container height** — `max-height` instead of fixed `380px`; clamp between `300px` and `50vh`
+- [ ] **Standardize input heights** — All text inputs use consistent padding/height
+
+### D. Visual Hierarchy & Component Polish
+
+**Rationale:** Page lacks clear visual zones. Buttons, inputs, panels blend together with similar backgrounds and borders.
+
+- [ ] **Add subtle backdrop to main canvas area** — Light card background with slight shadow
+- [ ] **Elevate Chat panel** — Increase shadow separation to emphasize it as secondary panel
+- [ ] **Add visual separation between toolbar and canvas** — Subtle divider line or shadow below toolbar
+- [ ] **Style active tool button more distinctly** — Add underline bar or left accent indicator
+- [ ] **Refine VideoGrid containers** — Subtle border/glow for active speaking peer
+- [ ] **Style room info header** — Background card, better typography for room name/user count/username
+
+### E. Border Radius Normalization
+
+**Rationale:** 7 distinct radius values in use: `4px`, `8px`, `16px`, plus hardcoded `18px`, `20px`, `6px`, `3px`.
+
+- [ ] **Replace `border-radius: 16px`** in Canvas toolbar buttons with `var(--radius-lg)`
+- [ ] **Replace `border-radius: 18px`** in MessageList message bubbles with `var(--radius-lg)`
+- [ ] **Replace `border-radius: 20px`** in MessageInput textarea/send button with `var(--radius-lg)`
+- [ ] **Replace `border-radius: 6px`** in Chat minimize button with `var(--radius-sm)` or `var(--radius-md)`
+- [ ] **Use `var(--radius-full)`** (9999px) for pill-shaped elements (LoadingSpinner, badges)
+
+### F. Animation & Micro-interactions
+
+**Rationale:** Basic transitions exist but lack personality. No micro-interactions, staggered animations, or page transitions.
+
+- [ ] **Add button press ripple effect** — `transform: scale(0.97)` on `:active` for primary buttons
+- [ ] **Add toast entrance/exit animation** — Fade + slide-in, fade + slide-out on dismiss
+- [ ] **Add message bubble entrance animation** — Slide up + fade (`translateY(10px)` → `0`, `opacity 0` → `1`)
+- [ ] **Add skeleton shimmer polish** — Smoother gradient, slower (`1.8s`) for elegance
+- [ ] **Add ConfirmationDialog entrance** — Overlay fades in, dialog scales up from 0.95
+- [ ] **Add tooltip on hover for icon-only buttons** — After 500ms delay for emoji/SVG buttons
+- [ ] **Add video connection status pulse** — Subtle pulsing dot next to "Connected peers" count
+- [ ] **Verify all animations respect `prefers-reduced-motion`** — Already partially implemented
+
+### G. Unified Icon System
+
+**Rationale:** Raw emoji characters used for all icons (🎤🔇📹🎥📞💬↩↪⚠️×+−). Emoji rendering varies by OS, lacks consistent sizing, and isn't accessible as icons.
+
+- [ ] **Install `lucide-react`** — Lightweight icon library (~30kB gzipped, tree-shakeable)
+- [ ] **Create `<Icon name="..." size="..." />` component** — Wraps Lucide icons with `aria-hidden="true"` and `focusable="false"`
+- [ ] **Replace emoji icons in Controls.jsx** — `mic`/`mic-off` (🎤/🔇), `camera`/`camera-off` (📹/🎥), `phone-off` (📞)
+- [ ] **Replace emoji icons in MessageInput** — `send` (▶️/arrow)
+- [ ] **Replace emoji icons in EmptyState** — `message-circle` (💬), `video` (📹)
+- [ ] **Replace emoji icons in Canvas toolbar** — `undo`/`redo` (↩/↪), `plus`/`minus` (+/−)
+- [ ] **Replace emoji icons in Toast/Error** — `x` (×), `alert-triangle` (⚠️)
+- [ ] **Define standard icon sizes** — `--icon-sm: 14px`, `--icon-md: 18px`, `--icon-lg: 24px`
+
+### H. Empty States & Feedback
+
+**Rationale:** Room list "Loading..." is plain text. No onboarding hints.
+
+- [ ] **Replace Room.jsx `"Loading..."`** with styled Skeleton placeholders matching room list layout
+- [ ] **Add tooltip/helper text for first-time users** — Subtle hint below canvas: "Select a tool and start drawing"
+- [ ] **Refine VideoGrid empty state** — Secondary text: "Your video will appear here once someone joins"
+- [ ] **Add success feedback on room create** — Toast appears consistently
+- [ ] **Add error feedback for socket disconnection** — Show reconnection attempt count
+
+### I. Form & Input Polish
+
+**Rationale:** Room join form and username inputs have thin borders and minimal styling.
+
+- [ ] **Refine Room.jsx input fields** — Subtle inner shadow, increased padding, icon prefix (🔑 for room ID, 👤 for username)
+- [ ] **Add focus state ring** — Replace `outline` with consistent `box-shadow` ring using `--color-primary` at `0 0 0 3px`
+- [ ] **Refine form submit buttons** — Subtle gradient overlay on hover, larger border-radius
+- [ ] **Add inline validation styling** — Red/green border on invalid/valid inputs with icon indicator
+- [ ] **Style disabled states** — Consistent muted appearance with `not-allowed` cursor
+
+### J. Canvas Toolbar Redesign
+
+**Rationale:** Flat row of identical-looking buttons with no visual grouping.
+
+- [ ] **Group tools into logical sections** — Drawing tools | Shapes | Text | Actions (Undo, Redo, Clear)
+- [ ] **Add visual separators between groups** — Thin vertical divider lines
+- [ ] **Replace text labels with icon+label** — Small SVG icons next to each tool name
+- [ ] **Refine active state** — Colored background + inset shadow + colored text
+- [ ] **Add tooltip on hover** — Tool name + keyboard shortcut if applicable
+
+### K. Responsive & Mobile Refinements
+
+**Rationale:** Basic `flex-wrap` and one `768px` media query exist.
+
+- [ ] **Add `480px` mobile breakpoint** — Stack panels vertically, reduce padding, compact toolbar
+- [ ] **Add `1024px` tablet breakpoint** — Slightly narrower right panel (`300px`), smaller gaps
+- [ ] **Ensure canvas scrolls horizontally on small screens** — `overflow-x: auto` container
+- [ ] **Reduce font sizes on mobile** — Use `clamp()` for key text elements
+
+### L. Accessibility Deep Pass
+
+**Rationale:** Good baseline from Phase 3, but gaps remain.
+
+- [ ] **Add skip-to-content link** — First focusable element for keyboard users
+- [ ] **Add focus indicators** — Visible focus styles on ALL interactive elements
+- [ ] **Add `aria-busy` on loading states** — For skeleton loaders and spinners
+- [ ] **Add `aria-controls` on expandable sections** — Chat minimize button references chat panel
+- [ ] **Add `aria-expanded` on minimize button** — Reflects chat panel state
+- [ ] **Add `aria-atomic="true"` on toast container** — Screen readers announce entire toast
+- [ ] **Ensure proper heading hierarchy** — `h1` → `h2` → `h3` progression throughout pages
+
+### M. Technical Cleanup
+
+- [ ] **Remove deprecated `DrawingTools.jsx`** — After confirming no imports reference it
+- [ ] **Remove unused `App.css`** — Vite boilerplate, not imported anywhere
+- [ ] **Fix `z-index` overlap** — `ConfirmationDialog` (1000) vs inline `PopupOverlay` (1000); rename or consolidate
+- [ ] **Remove `connectionStatus` prop from `ConnectionStatus`** — Destructured but never rendered
+- [ ] **Install `lucide-react`** — Add to `frontend/package.json`

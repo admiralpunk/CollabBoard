@@ -2,13 +2,14 @@ import { useState, useEffect } from "react"
 import styled from "styled-components"
 import MessageList from "./MessageList"
 import MessageInput from "./MessageInput"
+import Icon from "../../shared/components/Icon"
 
 const ChatHeader = styled.div`
-  background: linear-gradient(135deg, #BEBEBE 0%, #A9A9A9 100%);
+  background: linear-gradient(135deg, var(--color-gray-400) 0%, var(--color-gray-500) 100%);
   padding: 16px 20px;
   border-bottom: 1px solid rgba(190, 190, 190, 0.3);
-  font-weight: 600;
-  color: #2c3e50;
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-dark);
   text-align: center;
   display: flex;
   justify-content: space-between;
@@ -24,25 +25,24 @@ const ChatHeader = styled.div`
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, #BEBEBE, #A9A9A9, #BEBEBE);
+    background: linear-gradient(90deg, var(--color-gray-400), var(--color-gray-500), var(--color-gray-400));
   }
 `
 
 const MinimizeButton = styled.button`
   background: rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(231, 174, 0, 0.3);
-  font-size: 16px;
-  font-weight: bold;
   cursor: pointer;
-  color: #2c3e50;
-  padding: 4px 8px;
+  color: var(--color-text-dark);
+  padding: 4px;
   width: 28px;
   height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   transition: all 0.2s ease;
+  line-height: 0;
 
   &:hover {
     background: rgba(231, 174, 0, 0.3);
@@ -54,9 +54,11 @@ const MinimizeButton = styled.button`
 const ChatContainer = styled.div`
   display: flex;
   flex-direction: column;
+  max-height: ${props => props.$minimized ? '60px' : '50vh'};
+  min-height: ${props => props.$minimized ? '60px' : '300px'};
   height: ${props => props.$minimized ? '60px' : '380px'};
-  background: linear-gradient(180deg, #FFF8E1 0%, #FFF3E0 100%);
-  border-radius: 16px;
+  background: linear-gradient(180deg, var(--color-primary-light) 0%, #FFF3E0 100%);
+  border-radius: var(--radius-lg);
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.12),
     0 4px 16px rgba(255, 224, 130, 0.3),
@@ -127,14 +129,14 @@ const Chat = ({ socket, roomId, username, usernameMap }) => {
     .map(id => usernameMap?.[id] || `Peer ${id.slice(0, 6)}`)
 
   return (
-    <ChatContainer $minimized={isMinimized}>
-      <ChatHeader onClick={toggleMinimize} aria-label={isMinimized ? "Expand chat" : "Minimize chat"}>
+    <ChatContainer $minimized={isMinimized} role="region" aria-label="Chat panel">
+      <ChatHeader onClick={toggleMinimize} aria-controls="chat-panel" aria-expanded={!isMinimized} aria-label={isMinimized ? "Expand chat" : "Minimize chat"}>
         <span>Chat</span>
         <MinimizeButton onClick={(e) => {
           e.stopPropagation()
           toggleMinimize()
         }} aria-label={isMinimized ? "Expand" : "Minimize"}>
-          {isMinimized ? '+' : '−'}
+          <Icon name={isMinimized ? "maximize-2" : "minimize-2"} size={16} />
         </MinimizeButton>
       </ChatHeader>
       {!isMinimized && (

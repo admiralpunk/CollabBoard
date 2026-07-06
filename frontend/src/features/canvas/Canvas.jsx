@@ -2,6 +2,7 @@ import { useRef, useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useCanvas } from './hooks'
 import ConfirmationDialog from '../../shared/components/ConfirmationDialog'
+import Icon from '../../shared/components/Icon'
 
 const CanvasContainer = styled.div`
   margin: 20px;
@@ -9,21 +10,25 @@ const CanvasContainer = styled.div`
 
 const CanvasWrapper = styled.div`
   position: relative;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
 `
 
 const StyledCanvas = styled.canvas`
-  border: 2px solid #000;
   cursor: crosshair;
   background-color: white;
   touch-action: none;
   max-width: 100%;
+  display: block;
 `
 
 const TextOverlay = styled.textarea`
   position: absolute;
   padding: 2px;
   margin: 0;
-  border: 1px dashed #999;
+  border: 1px dashed var(--color-gray-500);
   outline: none;
   background: transparent;
   resize: none;
@@ -33,7 +38,7 @@ const TextOverlay = styled.textarea`
   min-width: 30px;
   min-height: 20px;
   z-index: 10;
-  line-height: 1.2;
+  line-height: var(--leading-tight);
 `
 
 const ToolBar = styled.div`
@@ -42,33 +47,60 @@ const ToolBar = styled.div`
   gap: 10px;
   align-items: center;
   flex-wrap: wrap;
+  padding: 10px 14px;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+`
+
+const ToolGroup = styled.div`
+  display: flex;
+  gap: 4px;
+  align-items: center;
+`
+
+const Divider = styled.div`
+  width: 1px;
+  height: 24px;
+  background: var(--color-border);
+  margin: 0 4px;
 `
 
 const ColorPicker = styled.input`
   width: 50px;
   height: 30px;
+  cursor: pointer;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 2px;
 `
 
 const SizeInput = styled.input`
   width: 100px;
+  cursor: pointer;
 `
 
 const Button = styled.button`
-  padding: 8px 16px;
-  background-color: #FFE082;
-  color: #333;
+  padding: 8px 14px;
+  background-color: var(--color-primary);
+  color: var(--color-text-on-primary);
   border: none;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: background-color 0.2s, transform 0.15s;
+  transition: background-color 0.2s, transform 0.15s, box-shadow 0.2s;
+  font-weight: var(--weight-medium);
+  font-size: var(--body-sm);
+  display: flex;
+  align-items: center;
+  gap: 4px;
 
   &:hover {
-    background-color: #e7ae00;
+    background-color: var(--color-primary-hover);
     transform: translateY(-1px);
   }
 
   &:active {
-    transform: translateY(0);
+    transform: scale(0.97);
   }
 
   &:disabled {
@@ -78,16 +110,16 @@ const Button = styled.button`
   }
 
   &:focus-visible {
-    outline: 2px solid #e7ae00;
+    outline: 2px solid var(--color-primary-hover);
     outline-offset: 2px;
   }
 `
 
 const ClearButton = styled(Button)`
-  background-color: #e74c3c;
+  background-color: var(--color-danger);
   color: white;
 
-  &:hover { background-color: #c0392b; }
+  &:hover { background-color: var(--color-danger-hover); }
 `
 
 const Canvas = ({ socket, roomId }) => {
@@ -169,27 +201,51 @@ const Canvas = ({ socket, roomId }) => {
           onChange={(e) => setSize(parseInt(e.target.value))}
           aria-label="Brush size"
         />
-        <Button onClick={() => setTool('pen')} style={{ backgroundColor: isActive('pen') ? '#e7ae00' : '#FFE082' }} aria-label="Pen tool" aria-pressed={isActive('pen')}>
-          Pen
-        </Button>
-        <Button onClick={() => setTool('eraser')} style={{ backgroundColor: isActive('eraser') ? '#e7ae00' : '#FFE082' }} aria-label="Eraser tool" aria-pressed={isActive('eraser')}>
-          Eraser
-        </Button>
-        <Button onClick={() => setTool('rectangle')} style={{ backgroundColor: isActive('rectangle') ? '#e7ae00' : '#FFE082' }} aria-label="Rectangle tool" aria-pressed={isActive('rectangle')}>
-          Rectangle
-        </Button>
-        <Button onClick={() => setTool('circle')} style={{ backgroundColor: isActive('circle') ? '#e7ae00' : '#FFE082' }} aria-label="Circle tool" aria-pressed={isActive('circle')}>
-          Circle
-        </Button>
-        <Button onClick={() => setTool('line')} style={{ backgroundColor: isActive('line') ? '#e7ae00' : '#FFE082' }} aria-label="Line tool" aria-pressed={isActive('line')}>
-          Line
-        </Button>
-        <Button onClick={() => setTool('text')} style={{ backgroundColor: isActive('text') ? '#e7ae00' : '#FFE082' }} aria-label="Text tool" aria-pressed={isActive('text')}>
-          Text
-        </Button>
-        <Button onClick={undo} aria-label="Undo">↩ Undo</Button>
-        <Button onClick={redo} aria-label="Redo">↪ Redo</Button>
-        <ClearButton onClick={handleClearClick} aria-label="Clear canvas">Clear Canvas</ClearButton>
+        <ToolGroup>
+          <Button onClick={() => setTool('pen')} $active={isActive('pen')} style={{ backgroundColor: isActive('pen') ? 'var(--color-primary-hover)' : '' }} aria-label="Pen tool" aria-pressed={isActive('pen')} title="Pen">
+            <Icon name="pen" size={14} />
+            Pen
+          </Button>
+          <Button onClick={() => setTool('eraser')} $active={isActive('eraser')} style={{ backgroundColor: isActive('eraser') ? 'var(--color-primary-hover)' : '' }} aria-label="Eraser tool" aria-pressed={isActive('eraser')} title="Eraser">
+            <Icon name="eraser" size={14} />
+            Eraser
+          </Button>
+        </ToolGroup>
+        <Divider />
+        <ToolGroup>
+          <Button onClick={() => setTool('rectangle')} $active={isActive('rectangle')} style={{ backgroundColor: isActive('rectangle') ? 'var(--color-primary-hover)' : '' }} aria-label="Rectangle tool" aria-pressed={isActive('rectangle')} title="Rectangle">
+            <Icon name="rectangle" size={14} />
+            Rect
+          </Button>
+          <Button onClick={() => setTool('circle')} $active={isActive('circle')} style={{ backgroundColor: isActive('circle') ? 'var(--color-primary-hover)' : '' }} aria-label="Circle tool" aria-pressed={isActive('circle')} title="Circle">
+            <Icon name="circle" size={14} />
+            Circle
+          </Button>
+          <Button onClick={() => setTool('line')} $active={isActive('line')} style={{ backgroundColor: isActive('line') ? 'var(--color-primary-hover)' : '' }} aria-label="Line tool" aria-pressed={isActive('line')} title="Line">
+            <Icon name="line" size={14} />
+            Line
+          </Button>
+          <Button onClick={() => setTool('text')} $active={isActive('text')} style={{ backgroundColor: isActive('text') ? 'var(--color-primary-hover)' : '' }} aria-label="Text tool" aria-pressed={isActive('text')} title="Text">
+            <Icon name="text" size={14} />
+            Text
+          </Button>
+        </ToolGroup>
+        <Divider />
+        <ToolGroup>
+          <Button onClick={undo} aria-label="Undo" title="Undo">
+            <Icon name="undo" size={14} />
+            Undo
+          </Button>
+          <Button onClick={redo} aria-label="Redo" title="Redo">
+            <Icon name="redo" size={14} />
+            Redo
+          </Button>
+        </ToolGroup>
+        <Divider />
+        <ClearButton onClick={handleClearClick} aria-label="Clear canvas" title="Clear Canvas">
+          <Icon name="trash" size={14} />
+          Clear
+        </ClearButton>
       </ToolBar>
       <CanvasWrapper>
         <StyledCanvas
