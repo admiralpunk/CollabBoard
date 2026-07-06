@@ -12,6 +12,16 @@ const ControlBar = styled.div`
   border-radius: var(--radius-md);
   margin: 10px 20px;
   flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    margin: 10px 12px;
+  }
+
+  @media (max-width: 480px) {
+    margin: 10px 8px;
+    padding: 8px;
+    gap: 6px;
+  }
 `
 
 const ControlButton = styled.button`
@@ -40,6 +50,12 @@ const ControlButton = styled.button`
     outline: 2px solid var(--color-primary-hover);
     outline-offset: 2px;
   }
+
+  @media (max-width: 480px) {
+    padding: 6px 12px;
+    font-size: var(--body-sm);
+    gap: 4px;
+  }
 `
 
 const LeaveButton = styled.button`
@@ -62,6 +78,12 @@ const LeaveButton = styled.button`
   &:focus-visible {
     outline: 2px solid white;
     outline-offset: 2px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 6px 12px;
+    font-size: var(--body-sm);
+    gap: 4px;
   }
 `
 

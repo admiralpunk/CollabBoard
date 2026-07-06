@@ -110,7 +110,9 @@ export const useCanvas = (canvasRef, socket, roomId) => {
     const canvas = canvasRef.current
     const ctx = canvas.getContext("2d", { willReadFrequently: true })
 
-    canvas.width = 800
+    const parent = canvas.parentElement
+    const initW = parent ? Math.min(parent.getBoundingClientRect().width - 40, 800) : 800
+    canvas.width = Math.max(initW, 320)
     canvas.height = 600
 
     ctx.fillStyle = "white"

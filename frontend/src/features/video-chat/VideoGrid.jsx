@@ -7,6 +7,17 @@ const Grid = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 10px;
   margin: 20px;
+
+  @media (max-width: 768px) {
+    margin: 12px;
+    gap: 8px;
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    margin: 8px;
+    gap: 6px;
+  }
 `
 
 const VideoContainer = styled.div`

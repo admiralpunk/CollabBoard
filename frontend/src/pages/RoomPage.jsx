@@ -15,6 +15,15 @@ import Icon from "../shared/components/Icon"
 const AppContainer = styled.div`
   min-height: 100vh;
   padding: 20px;
+  overscroll-behavior: none;
+
+  @media (max-width: 768px) {
+    padding: 12px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 8px;
+  }
 `
 
 const RoomInfo = styled.div`
@@ -24,6 +33,11 @@ const RoomInfo = styled.div`
   border-radius: var(--radius-md);
   padding: var(--space-md);
   box-shadow: var(--shadow-sm);
+
+  @media (max-width: 480px) {
+    padding: var(--space-sm);
+    margin-bottom: var(--space-sm);
+  }
 `
 
 const ContentContainer = styled.div`
@@ -32,11 +46,24 @@ const ContentContainer = styled.div`
   max-width: 1600px;
   margin: 0 auto;
   flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    gap: 12px;
+  }
+
+  @media (max-width: 480px) {
+    gap: 8px;
+  }
 `
 
 const LeftPanel = styled.div`
   flex: 1;
   min-width: 300px;
+
+  @media (max-width: 768px) {
+    min-width: 0;
+    width: 100%;
+  }
 `
 
 const RightPanel = styled.div`
@@ -80,11 +107,26 @@ const BackButton = styled.button`
     outline: 2px solid var(--color-primary-hover);
     outline-offset: 2px;
   }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 8px 16px;
+    margin-bottom: 8px;
+  }
 `
 
 const ErrorContainer = styled.div`
   text-align: center;
   padding: 50px;
+
+  @media (max-width: 480px) {
+    padding: 24px;
+  }
 `
 
 const ErrorTitle = styled.h2`
@@ -112,6 +154,10 @@ const RetryButton = styled.button`
 const JoinContainer = styled.div`
   text-align: center;
   padding: 50px;
+
+  @media (max-width: 480px) {
+    padding: 20px 10px;
+  }
 `
 
 const JoinTitle = styled.h2`
@@ -125,6 +171,12 @@ const JoinRow = styled.div`
   gap: 10px;
   justify-content: center;
   flex-wrap: wrap;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
 `
 
 const UsernameInput = styled.input`
@@ -138,6 +190,10 @@ const UsernameInput = styled.input`
     outline: none;
     border-color: var(--color-border-focus);
     box-shadow: 0 0 0 3px rgba(231, 174, 0, 0.15);
+  }
+
+  @media (max-width: 480px) {
+    width: 100%;
   }
 `
 
@@ -159,6 +215,10 @@ const JoinButton = styled.button`
     outline: 2px solid var(--color-primary-hover);
     outline-offset: 2px;
   }
+
+  @media (max-width: 480px) {
+    width: 100%;
+  }
 `
 
 const NotificationBanner = styled.div`
@@ -168,6 +228,11 @@ const NotificationBanner = styled.div`
   border-radius: var(--radius-sm);
   margin-bottom: 10px;
   text-align: center;
+
+  @media (max-width: 480px) {
+    font-size: var(--body-sm);
+    padding: 8px;
+  }
 `
 
 const PopupOverlay = styled.div`
@@ -178,6 +243,7 @@ const PopupOverlay = styled.div`
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  padding: 20px;
 `
 
 const PopupDialog = styled.div`
@@ -188,7 +254,14 @@ const PopupDialog = styled.div`
   z-index: 1001;
   border: 2px solid var(--color-primary);
   min-width: 300px;
+  max-width: 90vw;
   text-align: center;
+  width: 100%;
+
+  @media (max-width: 480px) {
+    min-width: 0;
+    padding: 16px;
+  }
 `
 
 const PopupTitle = styled.h3`
@@ -224,6 +297,11 @@ const VideoChatPlaceholder = styled.div`
   border-radius: var(--radius-md);
   margin-bottom: 20px;
   color: var(--color-text-secondary);
+
+  @media (max-width: 480px) {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
 `
 
 const DisconnectBanner = styled.div`
@@ -235,6 +313,7 @@ const DisconnectBanner = styled.div`
   padding: 8px;
   z-index: 999;
   font-weight: var(--weight-bold);
+  font-size: var(--body-sm);
 `
 
 const UserInfo = styled.div`
@@ -242,6 +321,12 @@ const UserInfo = styled.div`
   justify-content: center;
   gap: var(--space-lg);
   flex-wrap: wrap;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: var(--space-xs);
+    font-size: var(--body-sm);
+  }
 `
 
 const RoomPage = () => {

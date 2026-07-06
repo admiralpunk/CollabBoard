@@ -9,6 +9,14 @@ import Toast from "../shared/components/Toast"
 const AppContainer = styled.div`
   min-height: 100vh;
   padding: 20px;
+
+  @media (max-width: 768px) {
+    padding: 12px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 8px;
+  }
 `
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000"

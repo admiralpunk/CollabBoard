@@ -15,6 +15,18 @@ const RoomContainer = styled.div`
   align-items: center;
   min-height: 100vh;
   padding-top: 15vh;
+
+  @media (max-width: 768px) {
+    padding-top: 10vh;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  @media (max-width: 480px) {
+    padding-top: 8vh;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
 `
 
 const Input = styled.input`
@@ -29,6 +41,11 @@ const Input = styled.input`
     outline: none;
     border-color: var(--color-border-focus);
     box-shadow: 0 0 0 3px rgba(231, 174, 0, 0.15);
+  }
+
+  @media (max-width: 480px) {
+    padding: 10px 12px;
+    margin: 8px 0;
   }
 `
 
@@ -56,6 +73,11 @@ const Button = styled.button`
     outline: 2px solid var(--color-primary-hover);
     outline-offset: 2px;
   }
+
+  @media (max-width: 480px) {
+    padding: 10px;
+    margin-top: 8px;
+  }
 `
 
 const ErrorText = styled.div`
@@ -68,6 +90,10 @@ const RoomListSection = styled.div`
   width: 100%;
   margin-top: 30px;
   text-align: left;
+
+  @media (max-width: 480px) {
+    margin-top: 20px;
+  }
 `
 
 const RoomListTitle = styled.h3`
@@ -97,11 +123,19 @@ const RoomEntry = styled.div`
     outline: 2px solid var(--color-primary-hover);
     outline-offset: 2px;
   }
+
+  @media (max-width: 480px) {
+    padding: 8px 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
 `
 
 const RoomName = styled.span`
   font-weight: var(--weight-semibold);
   color: var(--color-text-primary);
+  word-break: break-all;
 `
 
 const RoomUsers = styled.span`
@@ -128,6 +162,11 @@ const NotificationBanner = styled.div`
   padding: 10px;
   border-radius: var(--radius-sm);
   margin-bottom: 10px;
+
+  @media (max-width: 480px) {
+    font-size: var(--body-sm);
+    padding: 8px;
+  }
 `
 
 const VALID_ROOM_RE = /^[a-zA-Z0-9_-]{1,30}$/

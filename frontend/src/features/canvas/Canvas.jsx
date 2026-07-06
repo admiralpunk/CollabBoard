@@ -6,6 +6,14 @@ import Icon from '../../shared/components/Icon'
 
 const CanvasContainer = styled.div`
   margin: 20px;
+
+  @media (max-width: 768px) {
+    margin: 12px;
+  }
+
+  @media (max-width: 480px) {
+    margin: 8px;
+  }
 `
 
 const CanvasWrapper = styled.div`
@@ -51,12 +59,18 @@ const ToolBar = styled.div`
   background: var(--color-surface);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
+
+  @media (max-width: 480px) {
+    gap: 6px;
+    padding: 8px 10px;
+  }
 `
 
 const ToolGroup = styled.div`
   display: flex;
   gap: 4px;
   align-items: center;
+  flex-wrap: wrap;
 `
 
 const Divider = styled.div`
@@ -64,6 +78,11 @@ const Divider = styled.div`
   height: 24px;
   background: var(--color-border);
   margin: 0 4px;
+
+  @media (max-width: 480px) {
+    height: 20px;
+    margin: 0 2px;
+  }
 `
 
 const ColorPicker = styled.input`
@@ -73,11 +92,20 @@ const ColorPicker = styled.input`
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   padding: 2px;
+
+  @media (max-width: 480px) {
+    width: 40px;
+    height: 28px;
+  }
 `
 
 const SizeInput = styled.input`
   width: 100px;
   cursor: pointer;
+
+  @media (max-width: 480px) {
+    width: 70px;
+  }
 `
 
 const Button = styled.button`
@@ -112,6 +140,12 @@ const Button = styled.button`
   &:focus-visible {
     outline: 2px solid var(--color-primary-hover);
     outline-offset: 2px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 6px 10px;
+    font-size: 0.7rem;
+    border-radius: var(--radius-md);
   }
 `
 
