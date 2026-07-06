@@ -49,10 +49,7 @@ app.get('/api/rooms', (req, res) => {
   const enriched = {}
   for (const [roomId, info] of Object.entries(rooms)) {
     enriched[roomId] = {
-      userCount: info.userCount,
-      users: info.users.map(sid => ({
-        username: roomService.getUsername(sid)
-      }))
+      userCount: info.userCount
     }
   }
   res.json(enriched)

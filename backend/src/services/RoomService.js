@@ -182,18 +182,20 @@ class RoomService {
 
   getAllRooms(io) {
     const rooms = io?.sockets?.adapter?.rooms
+    const connectedSockets = io?.sockets?.sockets || {}
     if (!rooms) return {}
+
+    const socketIds = new Set(Object.keys(connectedSockets))
 
     const roomsInfo = {}
     for (const roomId of Object.keys(rooms)) {
-      if (roomId === roomId) {
-        const sockets = Object.keys(rooms[roomId]?.sockets || {})
-        roomsInfo[roomId] = {
-          userCount: sockets.length,
-          users: sockets.map(sid => ({
-            username: this.getUsername(sid)
-          }))
-        }
+      if (socketIds.has(roomId)) continue
+
+      const sockets = Object.keys(rooms[roomId]?.sockets || {})
+      if (sockets.length === 0) continue
+
+      roomsInfo[roomId] = {
+        userCount: sockets.length
       }
     }
     return roomsInfo

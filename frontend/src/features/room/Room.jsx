@@ -292,9 +292,6 @@ const Room = ({ onJoinRoom, notification }) => {
               <RoomName>{id}</RoomName>
               <RoomUsers>
                 {info.userCount} user{info.userCount !== 1 ? 's' : ''}
-                {info.users.length > 0 && (
-                  <> — {info.users.map(u => u.username).join(', ')}</>
-                )}
               </RoomUsers>
             </RoomEntry>
           ))
