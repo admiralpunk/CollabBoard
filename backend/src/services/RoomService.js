@@ -5,6 +5,7 @@ class RoomService {
     this.userConnections = new Map();
     this.connectionTimestamps = new Map();
     this.canvasHistory = new Map();
+    this.canvasUndoStack = new Map();
   }
 
   // Room management
@@ -110,6 +111,39 @@ class RoomService {
 
   clearCanvasHistory(roomId) {
     this.canvasHistory.delete(roomId)
+    this.canvasUndoStack.delete(roomId)
+  }
+
+  undoLastStroke(roomId) {
+    const history = this.canvasHistory.get(roomId)
+    if (!history || history.length === 0) return null
+
+    let undoStack = this.canvasUndoStack.get(roomId)
+    if (!undoStack) {
+      undoStack = []
+      this.canvasUndoStack.set(roomId, undoStack)
+    }
+
+    const lastStrokeId = history[history.length - 1].strokeId
+    const removed = []
+    while (history.length > 0 && history[history.length - 1].strokeId === lastStrokeId) {
+      removed.unshift(history.pop())
+    }
+    undoStack.push(...removed)
+    return this.getCanvasHistory(roomId)
+  }
+
+  redoLastStroke(roomId) {
+    const undoStack = this.canvasUndoStack.get(roomId)
+    if (!undoStack || undoStack.length === 0) return null
+
+    const lastStrokeId = undoStack[undoStack.length - 1].strokeId
+    const restored = []
+    while (undoStack.length > 0 && undoStack[undoStack.length - 1].strokeId === lastStrokeId) {
+      restored.unshift(undoStack.pop())
+    }
+    restored.forEach(d => this.addDrawEvent(roomId, d))
+    return this.getCanvasHistory(roomId)
   }
 
   // Check if user has an active connection

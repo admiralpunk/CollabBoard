@@ -76,8 +76,9 @@ export const usePeerConnection = (socket, roomId, stream, myId) => {
     // Handle incoming streams
     peer.ontrack = (event) => {
       if (event.streams && event.streams[0]) {
-        setStreams(prev => ({ ...prev, [peerId]: event.streams[0] }));
-        setConnectionStatus(prev => ({ ...prev, [peerId]: 'connected' }));
+        const incomingStream = event.streams[0]
+        setStreams(prev => ({ ...prev, [peerId]: incomingStream }))
+        setConnectionStatus(prev => ({ ...prev, [peerId]: 'connected' }))
       }
     };
 

@@ -1,10 +1,11 @@
 import roomService from '../../services/RoomService.js'
 
 export const handleJoinRoom = (socket, io) => ({ roomId, userId, username }) => {
-  if (!roomId || typeof roomId !== 'string') return
+  if (!roomId || typeof roomId !== 'string' || roomId.length > 30) return
   if (!userId || typeof userId !== 'string') return
   if (!username || typeof username !== 'string') return
-  if (username.length < 1 || username.length > 30) return
+  if (username.length < 2 || username.length > 20) return
+  if (!/^[a-zA-Z0-9_\u0080-\uFFFF]+$/.test(username)) return
 
   // Check if user already has an active connection
   if (roomService.hasActiveConnection(userId, io)) {

@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
-import styled from "styled-components";
-import MessageList from "./MessageList";
-import MessageInput from "./MessageInput";
+import { useState, useEffect } from "react"
+import styled from "styled-components"
+import MessageList from "./MessageList"
+import MessageInput from "./MessageInput"
 
 const ChatHeader = styled.div`
   background: linear-gradient(135deg, #BEBEBE 0%, #A9A9A9 100%);
@@ -16,7 +16,7 @@ const ChatHeader = styled.div`
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   position: relative;
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -26,7 +26,7 @@ const ChatHeader = styled.div`
     height: 3px;
     background: linear-gradient(90deg, #BEBEBE, #A9A9A9, #BEBEBE);
   }
-`;
+`
 
 const MinimizeButton = styled.button`
   background: rgba(255, 255, 255, 0.2);
@@ -43,13 +43,13 @@ const MinimizeButton = styled.button`
   justify-content: center;
   border-radius: 6px;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background: rgba(231, 174, 0, 0.3);
     transform: scale(1.05);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
-`;
+`
 
 const ChatContainer = styled.div`
   display: flex;
@@ -65,37 +65,43 @@ const ChatContainer = styled.div`
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(10px);
-  
+
   &:hover {
     box-shadow: 
       0 12px 40px rgba(0, 0, 0, 0.15),
       0 6px 20px rgba(255, 224, 130, 0.4),
       inset 0 1px 0 rgba(255, 255, 255, 0.9);
   }
-`;
+`
 
-const Chat = ({ socket, roomId, username }) => {
-  const [messages, setMessages] = useState([]);
-  const [isMinimized, setIsMinimized] = useState(false);
+const Chat = ({ socket, roomId, username, usernameMap }) => {
+  const [messages, setMessages] = useState([])
+  const [isMinimized, setIsMinimized] = useState(false)
+  const [typingUsers, setTypingUsers] = useState([])
 
   useEffect(() => {
     const handleChatMessage = ({ message }) => {
-      // If the message is from this user, mark as self, else use sender from message
-      setMessages((prev) => [
-        ...prev,
-        {
-          ...message,
-          sender: message.socketId === socket.id ? username : message.sender || "Other"
-        }
-      ]);
-    };
+      setMessages((prev) => [...prev, message])
+    }
 
-    socket.on("chat-message", handleChatMessage);
+    const handleUserTyping = ({ socketId, isTyping }) => {
+      setTypingUsers((prev) => {
+        if (isTyping) {
+          if (!prev.includes(socketId)) return [...prev, socketId]
+          return prev
+        }
+        return prev.filter(id => id !== socketId)
+      })
+    }
+
+    socket.on("chat-message", handleChatMessage)
+    socket.on("user-typing", handleUserTyping)
 
     return () => {
-      socket.off("chat-message", handleChatMessage);
-    };
-  }, [socket, username]);
+      socket.off("chat-message", handleChatMessage)
+      socket.off("user-typing", handleUserTyping)
+    }
+  }, [socket])
 
   const handleSendMessage = (message) => {
     const newMessage = {
@@ -104,33 +110,41 @@ const Chat = ({ socket, roomId, username }) => {
       sender: username,
       socketId: socket.id,
       timestamp: new Date().toISOString(),
-    };
-    socket.emit("chat-message", { roomId, message: newMessage });
-  };
+    }
+    socket.emit("chat-message", { roomId, message: newMessage })
+  }
+
+  const handleTyping = (isTyping) => {
+    socket.emit("typing", { roomId, isTyping })
+  }
 
   const toggleMinimize = () => {
-    setIsMinimized(!isMinimized);
-  };
+    setIsMinimized(!isMinimized)
+  }
+
+  const otherTyping = typingUsers
+    .filter(id => id !== socket.id)
+    .map(id => usernameMap?.[id] || `Peer ${id.slice(0, 6)}`)
 
   return (
     <ChatContainer $minimized={isMinimized}>
       <ChatHeader onClick={toggleMinimize}>
-        <span>💬 Chat</span>
+        <span>Chat</span>
         <MinimizeButton onClick={(e) => {
-          e.stopPropagation();
-          toggleMinimize();
+          e.stopPropagation()
+          toggleMinimize()
         }}>
           {isMinimized ? '+' : '−'}
         </MinimizeButton>
       </ChatHeader>
       {!isMinimized && (
         <>
-          <MessageList messages={messages} username={username} />
-          <MessageInput onSendMessage={handleSendMessage} />
+          <MessageList messages={messages} username={username} typingUsers={otherTyping} />
+          <MessageInput onSendMessage={handleSendMessage} onTyping={handleTyping} />
         </>
       )}
     </ChatContainer>
-  );
-};
+  )
+}
 
-export default Chat;
+export default Chat

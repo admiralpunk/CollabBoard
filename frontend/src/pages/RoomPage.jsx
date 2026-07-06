@@ -430,6 +430,7 @@ const RoomPage = () => {
                   userId={userId} 
                   username={username} 
                   usernameMap={usernameMap}
+                  onLeaveRoom={handleBackToHome}
                 />
               ) : (
                 <div style={{ 
@@ -442,7 +443,7 @@ const RoomPage = () => {
                   {isJoining ? 'Joining room...' : 'Setting up video chat...'}
                 </div>
               )}
-              <Chat socket={socket} roomId={roomId} username={username} />
+              <Chat socket={socket} roomId={roomId} username={username} usernameMap={usernameMap} />
             </RightPanel>
           </ContentContainer>
         </AppContainer>

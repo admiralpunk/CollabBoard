@@ -18,29 +18,29 @@
 ## Phase 2: Feature Improvements
 
 ### Canvas
-- [ ] **Undo/redo** — Stroke history stack on client, undo/redo socket events for real-time sync
-- [ ] **Shape tools** — Rectangles, circles, lines, text tool with preview rendering
-- [ ] **Touch/pointer events** — `onPointerDown/Move/Up` to unify mouse + touch
-- [ ] **Drawing throttling** — Batch `draw` emits every 50ms instead of every mousemove
-- [ ] **Canvas resize** — Use `ResizeObserver` instead of hardcoded `800x600`
+- [x] **Undo/redo** — Stroke history stack on client, undo/redo socket events for real-time sync
+- [x] **Shape tools** — Rectangles, circles, lines, text tool with preview rendering
+- [x] **Touch/pointer events** — `onPointerDown/Move/Up` to unify mouse + touch
+- [x] **Drawing throttling** — Batch `draw` emits every 30ms instead of every mousemove
+- [x] **Canvas resize** — Use `ResizeObserver` instead of hardcoded `800x600`
 
 ### Chat
-- [ ] **Message timestamps** — Already in data, just not rendered in `MessageList.jsx`
-- [ ] **Auto-scroll to bottom** — `useEffect` to scroll on new messages
-- [ ] **Typing indicators** — `typing`/`stop-typing` events with debounce
-- [ ] **Server-validated sender** — Backend overwrites `sender` field using `socket._roomId` + `RoomService.userNames`
-- [ ] **Message char limit & Shift+Enter** — For multiline support
+- [x] **Message timestamps** — Rendered in `MessageList.jsx` using `toLocaleTimeString`
+- [x] **Auto-scroll to bottom** — `useEffect` + ref to scroll on new messages
+- [x] **Typing indicators** — `typing`/`user-typing` events with 1.5s debounce
+- [x] **Server-validated sender** — Backend overwrites `sender` using `RoomService.getUsername(socket.id)`
+- [x] **Message char limit & Shift+Enter** — Textarea with 500 char limit, Shift+Enter for newline
 
 ### Video Chat
-- [ ] **Use `onLeaveRoom` prop in `VideoChat.jsx`** — Add "End Call" button
-- [ ] **Leave-room button in Controls** — Alongside audio/video toggles
-- [ ] **Screen sharing** — `getDisplayMedia` support via new button
+- [x] **Use `onLeaveRoom` prop in `VideoChat.jsx`** — Passed from `RoomPage`, renders red Leave button
+- [x] **Leave-room button in Controls** — Added alongside audio/video toggles
+- [x] **Screen sharing** — `getDisplayMedia` support via new toggle button
 - [ ] **Device selection** — Choose camera/mic from available devices
 
 ### Room Management
-- [ ] **Room listing/discovery** — `list-rooms` endpoint + room browser on landing page
-- [ ] **Username validation** — Min/max length + character restrictions (client + server)
-- [ ] **Room ID validation** — Handle non-existent rooms gracefully
+- [x] **Room listing/discovery** — `GET /api/rooms` endpoint + room browser on landing page
+- [x] **Username validation** — 2-20 chars, alphanumeric + underscore (client + server)
+- [x] **Room ID validation** — 1-30 chars, alphanumeric + hyphens + underscores (client + server)
 
 ---
 
@@ -101,4 +101,4 @@
 - [ ] **`React.memo`** — Wrap `MessageList`, `VideoGrid`, `MessageInput`
 - [ ] **Backend Logger audit** — Replace `console.log` with `logger` module everywhere
 - [ ] **RoomService refactor** — Combine dual-tracking (Socket.IO rooms + RoomService Maps) into single source of truth
-- [ ] **`wrtc` / `@roamhq/wrtc` cleanup** — Remove unused dependencies
+- [x] **`wrtc` / `@roamhq/wrtc` cleanup** — Removed unused dependencies

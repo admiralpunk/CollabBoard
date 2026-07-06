@@ -6,6 +6,7 @@ import { corsMiddleware } from './middleware/cors.js';
 import { setupSocketEvents } from './socket/events.js';
 import logger from './utils/logger.js';
 import rateLimit from 'express-rate-limit';
+import roomService from './services/RoomService.js'
 
 const app = express();
 
@@ -48,7 +49,21 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Start server
+// Room listing endpoint
+app.get('/api/rooms', (req, res) => {
+  const rooms = roomService.getAllRooms()
+  const enriched = {}
+  for (const [roomId, info] of Object.entries(rooms)) {
+    enriched[roomId] = {
+      userCount: info.userCount,
+      users: info.users.map(sid => ({
+        username: roomService.getUsername(sid)
+      }))
+    }
+  }
+  res.json(enriched)
+})
+
 // Start server
 const PORT = process.env.PORT || config.port || 3000;
 

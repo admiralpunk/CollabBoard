@@ -20,7 +20,7 @@ const Video = styled.video`
   width: 100%;
   height: 100%;
   object-fit: cover;
-`;
+`
 
 const VideoGrid = ({ streams, username, usernameMap }) => {
   const videoRefs = useRef({});
@@ -30,22 +30,17 @@ const VideoGrid = ({ streams, username, usernameMap }) => {
       if (videoRefs.current[peerId] && stream) {
         const videoElement = videoRefs.current[peerId];
         
-        // Only set srcObject if it's different
         if (videoElement.srcObject !== stream) {
           videoElement.srcObject = stream;
           
-          // Play the video with better error handling
           const playPromise = videoElement.play();
           if (playPromise !== undefined) {
             playPromise.catch(e => {
-              // Only log errors that aren't about interrupted play requests
               if (e.name !== 'AbortError') {
               }
             });
           }
         }
-      } else if (!videoRefs.current[peerId]) {
-      } else if (!stream) {
       }
     });
   }, [streams]);

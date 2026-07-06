@@ -1,8 +1,8 @@
-import { forwardRef, useImperativeHandle } from "react";
-import VideoGrid from "./VideoGrid";
-import Controls from "./Controls";
-import { usePeerConnection, useSocketId, useMediaStream } from "./hooks";
-import { ConnectionStatus, ErrorMessage } from "./components";
+import { forwardRef, useImperativeHandle } from "react"
+import VideoGrid from "./VideoGrid"
+import Controls from "./Controls"
+import { usePeerConnection, useSocketId, useMediaStream } from "./hooks"
+import { ConnectionStatus, ErrorMessage } from "./components"
 
 const VideoChat = forwardRef(({ socket, roomId, userId, username, usernameMap = {}, onLeaveRoom }, ref) => {
   const {
@@ -13,22 +13,21 @@ const VideoChat = forwardRef(({ socket, roomId, userId, username, usernameMap = 
     toggleAudio,
     toggleVideo,
     stopStream,
-  } = useMediaStream();
-  
-  const myId = useSocketId(socket);
-  const { streams, peerCount, connectionStatus } = usePeerConnection(socket, roomId, stream, myId);
+  } = useMediaStream()
 
-  // Expose stopStream method to parent component via ref
+  const myId = useSocketId(socket)
+  const { streams, peerCount, connectionStatus } = usePeerConnection(socket, roomId, stream, myId)
+
   useImperativeHandle(ref, () => ({
     stopStream
-  }), [stopStream]);
+  }), [stopStream])
 
   return (
     <div>
       <ErrorMessage message={error} />
-      <ConnectionStatus 
-        peerCount={peerCount} 
-        streamCount={Object.keys(streams).length} 
+      <ConnectionStatus
+        peerCount={peerCount}
+        streamCount={Object.keys(streams).length}
         connectionStatus={connectionStatus}
       />
       <VideoGrid streams={streams} username={username} usernameMap={usernameMap} />
@@ -37,9 +36,10 @@ const VideoChat = forwardRef(({ socket, roomId, userId, username, usernameMap = 
         isVideoEnabled={isVideoEnabled}
         onToggleAudio={toggleAudio}
         onToggleVideo={toggleVideo}
+        onLeave={onLeaveRoom}
       />
     </div>
-  );
-});
+  )
+})
 
-export default VideoChat;
+export default VideoChat
